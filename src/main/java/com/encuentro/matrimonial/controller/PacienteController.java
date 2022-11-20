@@ -28,12 +28,6 @@ public class PacienteController {
 
 	@Autowired
 	private ICentroSaludService centroService;
-
-	@GetMapping()
-	public ResponseEntity<?> saludo() {
-		return new ResponseEntity<>(new ErrorMessage2(0, "Bienvenidos al sistema covid!"), HttpStatus.OK);
-	}
-
 	// servicio que trae el listado de pacientes
 	@RequestMapping(value = "/getPacientes", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<Paciente>>> getPacientes() {
