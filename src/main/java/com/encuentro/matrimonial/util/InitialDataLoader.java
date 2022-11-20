@@ -9,9 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,9 +37,6 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	@Autowired
 	private IUserRepository userRepository;
 
-	@Autowired
-	private ICentroSalud centroRepository;
-
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	@Override
@@ -51,12 +46,6 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		if (alreadySetup)
 			return;
 
-		Laboratorio lab = createLaboIfNotFound(1L, "Pfizer");
-		Laboratorio lab2 = createLaboIfNotFound(2L, "AstraZeneca");
-		Laboratorio lab3 = createLaboIfNotFound(3L, "Johnson's & Johnson's");
-		Estado_lote est = createEstadoIfNotFound(1L, "Registrado");
-		Estado_lote est2 = createEstadoIfNotFound(2L, "Enviado");
-		Estado_lote est3 = createEstadoIfNotFound(3L, "Recibido");
 
 		Privilege readPrivilege = createPrivilegeIfNotFound("PERSONAL_PRIVILEGE");
 		Privilege writePrivilege = createPrivilegeIfNotFound("ADMIN_PRIVILEGE");
@@ -74,7 +63,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		Role personalRole = roleRepository.findByName("ROLE_PERSONAL");
 		Role coordinadorRole = roleRepository.findByName("ROLE_COORDINADOR");
 		if (userRepository.findByUser("admin") == null) {
-			Usuario user = new Usuario(0L, "USER", "NAME", "admin", passwordEncoder.encode("admin"), "12154214",
+			Usuario user = new Usuario(0L, "Camilo", "Mosquera", "admin", passwordEncoder.encode("admin"), "1007064254",
 					new Date(), true, null);
 			ArrayList<Role> roles = new ArrayList<Role>();
 			roles.add(adminRole);
