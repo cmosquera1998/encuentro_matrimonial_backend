@@ -29,13 +29,10 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	private PrivilegeRepository privilegeRepository;
 
 	@Autowired
-	private IEstado_loteRepository estadoRepository;
-
-	@Autowired
-	private ILaboratorioRepository laboratorioRepository;
-
-	@Autowired
 	private IUserRepository userRepository;
+
+	@Autowired
+	private IPrimerPilarRepository primerPilarRepository;
 
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -46,30 +43,43 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		if (alreadySetup)
 			return;
 
-
-		Privilege readPrivilege = createPrivilegeIfNotFound("PERSONAL_PRIVILEGE");
+		Privilege readPrivilege = createPrivilegeIfNotFound("READ_PRIVILEGE");
 		Privilege writePrivilege = createPrivilegeIfNotFound("ADMIN_PRIVILEGE");
-		Privilege au = createPrivilegeIfNotFound("AUXILIAR_PRIVILEGE");
-		Privilege coo = createPrivilegeIfNotFound("COORDINADOR_PRIVILEGE");
+		Privilege createUserPrivilege = createPrivilegeIfNotFound("CREATE_USER_PRIVILEGE");
+		Privilege editInfoPrivilege = createPrivilegeIfNotFound("EDIT_INFO_PRIVILEGE");
 
-		List<Privilege> adminPrivileges = Arrays.asList(readPrivilege, writePrivilege, au, coo);
+		List<Privilege> adminPrivileges = Arrays.asList(readPrivilege, writePrivilege, createUserPrivilege,
+				editInfoPrivilege);
+		List<Privilege> diosesanoPrivileges = Arrays.asList(readPrivilege, writePrivilege);
+
+		createPrimerPilarIfNotFound(0L, new Date(), "10", "10", "10", "10", "10");
+		createPrimerPilarIfNotFound(0L, new Date(), "10", "10", "10", "10", "10");
+		createPrimerPilarIfNotFound(0L, new Date(), "10", "10", "10", "10", "10");
+		createPrimerPilarIfNotFound(0L, new Date(), "10", "10", "10", "10", "10");
+
 		createRoleIfNotFound("ROLE_ADMIN", adminPrivileges);
-		createRoleIfNotFound("ROLE_PERSONAL", Arrays.asList(readPrivilege));
-		createRoleIfNotFound("ROLE_AUXILIAR", Arrays.asList(au));
-		createRoleIfNotFound("ROLE_COORDINADOR", Arrays.asList(coo));
+		createRoleIfNotFound("ROLE_USUARIO", Arrays.asList(readPrivilege));
+		createRoleIfNotFound("ROLE_DIOSESANO", diosesanoPrivileges);
+		createRoleIfNotFound("ROLE_REGIONAL", Arrays.asList(writePrivilege));
+		createRoleIfNotFound("ROLE_ZONAL", Arrays.asList(readPrivilege));
+		createRoleIfNotFound("ROLE_LATAM", adminPrivileges);
 
 		Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-		Role auxiliarRole = roleRepository.findByName("ROLE_AUXILIAR");
-		Role personalRole = roleRepository.findByName("ROLE_PERSONAL");
-		Role coordinadorRole = roleRepository.findByName("ROLE_COORDINADOR");
+		Role usuarioRole = roleRepository.findByName("ROLE_USUARIO");
+		Role diosesanoRole = roleRepository.findByName("ROLE_DIOSESANO");
+		Role regionalRole = roleRepository.findByName("ROLE_REGIONAL");
+		Role zonalRole = roleRepository.findByName("ROLE_ZONAL");
+		Role latamRole = roleRepository.findByName("ROLE_LATAM");
 		if (userRepository.findByUser("admin") == null) {
-			Usuario user = new Usuario(0L, "Camilo", "Mosquera", "admin", passwordEncoder.encode("admin"), "1007064254",
+			Usuario user = new Usuario(0L, "Super admin", "Mosquera", "admin", passwordEncoder.encode("admin"), "001",
 					new Date(), true, null);
 			ArrayList<Role> roles = new ArrayList<Role>();
 			roles.add(adminRole);
-			roles.add(auxiliarRole);
-			roles.add(personalRole);
-			roles.add(coordinadorRole);
+			roles.add(usuarioRole);
+			roles.add(diosesanoRole);
+			roles.add(regionalRole);
+			roles.add(zonalRole);
+			roles.add(latamRole);
 			user.setRoles(roles);
 			userRepository.save(user);
 		}
@@ -88,26 +98,6 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Transactional
-	private Laboratorio createLaboIfNotFound(Long id, String name) {
-
-		Laboratorio lab = new Laboratorio(id, name);
-
-		laboratorioRepository.save(lab);
-
-		return lab;
-	}
-
-	@Transactional
-	private Estado_lote createEstadoIfNotFound(Long id, String esta) {
-
-		Estado_lote es = new Estado_lote(id, esta);
-
-		estadoRepository.save(es);
-
-		return es;
-	}
-
-	@Transactional
 	private Role createRoleIfNotFound(String name, Collection<Privilege> privileges) {
 
 		Role role = roleRepository.findByName(name);
@@ -116,6 +106,15 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			roleRepository.save(role);
 		}
 		return role;
+	}
+
+	@Transactional
+	private PrimerPilar createPrimerPilarIfNotFound(Long id, Date fecha, String numFDS, String numMatrinoniosVivieron,
+			String numSacerdotesVivieron, String numReligiososVivieron, String numReligiosasVivieron) {
+		PrimerPilar pilar = new PrimerPilar(id, fecha, numFDS, numMatrinoniosVivieron, numSacerdotesVivieron,
+				numReligiososVivieron, numReligiosasVivieron);
+		primerPilarRepository.save(pilar);
+		return pilar;
 	}
 
 }

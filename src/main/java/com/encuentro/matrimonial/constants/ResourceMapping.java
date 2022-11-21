@@ -8,11 +8,9 @@ public class ResourceMapping {
 
 	public static final String LOGIN = "/login";
 	public static final String USER = "/user";
-	public static final String LOTE = "/lote";
+	public static final String PRIMER_PILAR = "/pilar/primerPilar";
+	public static final String SEGUNDO_PILAR = "/pilar/segundoprimerPilar";
+	public static final String TERCERO_PILAR = "/pilar/tercerPilar";
+	public static final String CUARTO_PILAR = "/pilar/cuartoPilar";
 	public static final String LABORATORIO = "/laboratorio";
-	public static final String ROL = "/rol";
-	public static final String VACUNA = "/vacuna";
-	public static final String PACIENTE = "/paciente";
-	public static final String LOCATION = "/location";
-
 }

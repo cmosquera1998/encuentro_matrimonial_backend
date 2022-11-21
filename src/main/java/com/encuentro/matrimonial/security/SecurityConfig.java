@@ -42,10 +42,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.authorizeRequests()
 		.antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
 		.antMatchers("/login").permitAll()
+		.antMatchers("/pilar").permitAll()
 		.antMatchers("/user/**").hasAnyAuthority("ADMIN_PRIVILEGE")
-		.antMatchers("/lote/**").hasAnyAuthority("AUXILIAR_PRIVILEGE")
-		.antMatchers("/laboratorio/**").hasAnyAuthority("AUXILIAR_PRIVILEGE")
-		.antMatchers("/vacuna/**").hasAnyAuthority("AUXILIAR_PRIVILEGE")
+		.antMatchers("/pilar/primerPilar/**").hasAnyAuthority("ADMIN_PRIVILEGE")
+		.antMatchers("/xxxx/**").hasAnyAuthority("ADMIN_PRIVILEGE")
+		.antMatchers("/xxx/**").hasAnyAuthority("ADMIN_PRIVILEGE")
 		.and().sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

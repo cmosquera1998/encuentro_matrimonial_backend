@@ -3,8 +3,6 @@ package com.encuentro.matrimonial.modelo;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -19,18 +17,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ocupacion")
-public class Ocupacion {
-
+@Table(name = "pilar")
+public class Pilar {
 	@Id
 	@Column
-	// @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column
-	private String nombre;
-
-	@ManyToOne
-	@JoinColumn(name = "id_sector", referencedColumnName = "id", nullable = false)
-	private Sector sector;
+	private String nombre_pilar;
 }

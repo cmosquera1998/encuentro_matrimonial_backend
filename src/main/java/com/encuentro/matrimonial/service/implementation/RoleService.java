@@ -1,4 +1,4 @@
-package com.encuentro.matrimonial.implementation;
+package com.encuentro.matrimonial.service.implementation;
 
 import java.util.List;
 

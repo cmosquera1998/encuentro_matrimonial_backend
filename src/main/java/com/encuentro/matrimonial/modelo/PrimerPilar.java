@@ -1,15 +1,12 @@
 package com.encuentro.matrimonial.modelo;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.xml.bind.annotation.XmlElement;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,17 +18,30 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Entrega {
+@Entity(name = "primer_pilar")
+public class PrimerPilar {
 
 	@Id
 	@Column
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+
 	@Column
-	private int cantidad;
-	@XmlElement(required = true)
-	@JsonProperty("depa_nombre")
+	private Date fechaCreacion;
+
 	@Column
-	private String direcion;
-	
+	private String numFDS;
+
+	@Column
+	private String numMatrinoniosVivieron;
+
+	@Column
+	private String numSacerdotesVivieron;
+
+	@Column
+	private String numReligiososVivieron;
+
+	@Column
+	private String numReligiosasVivieron;
+
 }

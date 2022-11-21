@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ErrorMessage2 {
 
-	private int error;
+	private int code;
 	private String mensaje;
 
 }
