@@ -110,7 +110,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 
 	@Transactional
 	private PrimerPilar createPrimerPilarIfNotFound(Long id, Date fecha, int numFDS, int numMatrinoniosVivieron,
-			int numSacerdotesVivieron, int numReligiososVivieron) {
+			int numSacerdotesVivieron, int numReligiososVivieron, int numReligiosasVivieron) {
 		PrimerPilar pilar = new PrimerPilar(id, fecha, numFDS, numMatrinoniosVivieron, numSacerdotesVivieron,
 				numReligiososVivieron);
 		primerPilarRepository.save(pilar);
