@@ -46,5 +46,11 @@ public class CuartoPilar {
 
 	@Column
 	private int numMatrimoiosComunidad;
-
+	
+	@Column
+	private int numSacerdotesComunidad;
+	
+	@Column
+	private int numReligiososComunidad;
+	
 }

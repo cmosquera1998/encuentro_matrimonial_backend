@@ -1,5 +1,6 @@
 package com.encuentro.matrimonial.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,31 +16,32 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
-import com.encuentro.matrimonial.modelo.CuartoPilar;
-import com.encuentro.matrimonial.service.ICuartoPilarService;
+import com.encuentro.matrimonial.modelo.FormacionMatrimonio;
+import com.encuentro.matrimonial.service.IFormacionMatrimonioService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
 
 import lombok.extern.log4j.Log4j2;
 
 @RestController
-@RequestMapping(ResourceMapping.CUARTO_PILAR)
+@RequestMapping(ResourceMapping.FORMACION_MATRIMONIO)
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST,
 		RequestMethod.OPTIONS }, allowedHeaders = "*")
 @Log4j2
-public class CuartoPilarController {
+public class FormacionMatrimonioController {
 
 	@Autowired
-	private ICuartoPilarService pilarService;
+	private IFormacionMatrimonioService formacionService;
 
-	// servicio que trae el post encuentro
+	//servicio que trae una formacion  de matrimonio
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
 		log.debug("Id:-" + id);
 		try {
-			CuartoPilar pilar = pilarService.findByCuartoPilar(id);
-			ErrorMessage<?> error = pilar == null ? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", pilar);
+			FormacionMatrimonio formacion = formacionService.findByFormacionMatrimonio(id);
+			ErrorMessage<?> error = formacion == null 
+					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Formacion de matrimonio", formacion);
 			return ResponseEntity.ok().body(error);
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -48,14 +50,14 @@ public class CuartoPilarController {
 		}
 	}
 
-	// servicio que trae el listado de post encuentro
+	//servicio que trae el listado de formacion  de matrimonios
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAll() {
+	public ResponseEntity<ErrorMessage<List<FormacionMatrimonio>>> getAll() {
 		try {
-			List<CuartoPilar> listado = pilarService.getAll();
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
+			List<FormacionMatrimonio> listado = formacionService.getAll();
+			ErrorMessage<List<FormacionMatrimonio>> error = listado.isEmpty()
 					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de matrimonios", listado);
 			return ResponseEntity.ok().body(error);
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -64,15 +66,15 @@ public class CuartoPilarController {
 		}
 	}
 
-	// servicio que trae el listado de post encuentro por fecha
+	//servicio que trae el listado de formacion  de matrimonios por fecha
 	@RequestMapping(value = "/getFilter", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> getFilter(@RequestParam String dateString) {
 		log.debug("Fecha:-" + dateString);
 		try {
-			List<CuartoPilar> listado = pilarService.findByFiltroCuartoPilar(dateString);
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
+			List<FormacionMatrimonio> listado = formacionService.findByFiltroFormacionMatrimonio(dateString);
+			ErrorMessage<List<FormacionMatrimonio>> error = listado.isEmpty()
 					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de matrimonios", listado);
 			return ResponseEntity.ok().body(error);
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -81,13 +83,14 @@ public class CuartoPilarController {
 		}
 	}
 
-	// servicio para crear un post encuentro
+	//servicio para crear una formacion  de matrimonio
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
-	public ResponseEntity<?> create(@RequestBody CuartoPilar pilar) {
-		log.debug("DataBody:-" + pilar);
-		if (pilar != null) {
+	public ResponseEntity<?> create(@RequestBody FormacionMatrimonio formacion) {
+		log.debug("DataBody:-" + formacion);
+		if (formacion != null) {
 			try {
-				pilarService.create(pilar);
+				formacion.setFechaCreacion(new Date());
+				formacionService.create(formacion);
 				return ResponseEntity.ok().body(new ErrorMessage2(Mensaje.CODE_OK, Mensaje.CREATE_OK));
 			} catch (Exception e) {
 				log.error("Error:-" + e.getMessage());
@@ -98,19 +101,19 @@ public class CuartoPilarController {
 		return ResponseEntity.badRequest().body(new ErrorMessage2(1, Mensaje.BAD_REQUEST));
 	}
 
-	// servicio para actualizar un post encuentro
+	//servicio para actualizar una formacion  de matrimonio
 	@RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Accept=application/json")
-	public ResponseEntity<?> update(@RequestBody CuartoPilar pilar) {
-		log.info("DataBody:-" + pilar);
+	public ResponseEntity<?> update(@RequestBody FormacionMatrimonio formacion) {
+		log.info("DataBody:-" + formacion);
 		try {
-			Optional<CuartoPilar> pl = Optional.ofNullable(pilarService.findByCuartoPilar(pilar.getId()));
+			Optional<FormacionMatrimonio> pl = Optional.ofNullable(formacionService.findByFormacionMatrimonio(formacion.getId()));
 			if (!pl.isPresent()) {
 				return ((BodyBuilder) ResponseEntity.notFound())
 						.body(new ErrorMessage2(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND));
 			}
-			pilar.setFechaCreacion(pl.get().getFechaCreacion());
-			log.debug("DataBody:-" + pilar);
-			pilarService.update(pilar);
+			formacion.setFechaCreacion(pl.get().getFechaCreacion());
+			log.debug("DataBody:-" + formacion);
+			formacionService.update(formacion);
 			return ResponseEntity.ok().body(new ErrorMessage2(Mensaje.CODE_OK, Mensaje.UPDATE_OK));
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -119,17 +122,17 @@ public class CuartoPilarController {
 		}
 	}
 
-	// servicio para eliminar un fin de semanqa
+	//servicio para eliminar una formacion  de matrimonio
 	@RequestMapping(value = "/delete", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<?> delete(@RequestParam Long id) {
 		log.debug("Id:-" + id);
 		try {
-			Optional<CuartoPilar> pl = Optional.ofNullable(pilarService.findByCuartoPilar(id));
-			if (!pl.isPresent()) {
+			Optional<FormacionMatrimonio> fs = Optional.ofNullable(formacionService.findByFormacionMatrimonio(id));
+			if (!fs.isPresent()) {
 				return ((BodyBuilder) ResponseEntity.notFound())
 						.body(new ErrorMessage2(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND));
 			}
-			pilarService.delete(id);
+			formacionService.delete(id);
 			return ResponseEntity.ok(new ErrorMessage2(Mensaje.CODE_OK, Mensaje.DELETE_OK));
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());

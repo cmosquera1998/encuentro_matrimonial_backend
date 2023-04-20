@@ -40,5 +40,8 @@ public class TercerPilar {
 
 	@Column
 	private int numDiocesisExpansion;
+	
+	@Column
+	private int numDiocesisEclisiastica;
 
 }

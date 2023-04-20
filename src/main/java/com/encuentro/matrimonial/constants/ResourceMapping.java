@@ -12,4 +12,6 @@ public class ResourceMapping {
 	public static final String SEGUNDO_PILAR = "/pilar/segundoPilar";
 	public static final String TERCERO_PILAR = "/pilar/tercerPilar";
 	public static final String CUARTO_PILAR = "/pilar/cuartoPilar";
+	public static final String FORMACION_SACERDOTE = "/formacion/sacerdote";
+	public static final String FORMACION_MATRIMONIO = "/formacion/matrimonio";
 }

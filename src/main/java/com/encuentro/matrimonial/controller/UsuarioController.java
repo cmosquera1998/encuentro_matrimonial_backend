@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.ResourceMapping;
@@ -75,15 +76,14 @@ public class UsuarioController {
 		if (!us.isPresent()) {
 			return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
 		}
-		// user.setPassword(passwordEncoder.encode(user.getPassword()));
 		userService.updateUsuario(user);
 		return new ResponseEntity(new ErrorMessage2(0, "Usuario actualizado con exito!"), HttpStatus.OK);
 	}
 
 	// servicio para desactivar un usuario
-	@RequestMapping(value = "/deleteUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
-	public ResponseEntity<?> deleteUsuario(@RequestBody Usuario user) {
-		Usuario us = userService.findBy(user.getId());
+	@RequestMapping(value = "/desactivarUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
+	public ResponseEntity<?> desactivarUsuario(@RequestParam Long id) {
+		Usuario us = userService.findBy(id);
 		System.out.println(us);
 		if (us == null) {
 			return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
@@ -94,5 +94,18 @@ public class UsuarioController {
 		userService.updateUsuario(us);
 		return new ResponseEntity(new ErrorMessage2(0, "Usuario desactivado con exito!"), HttpStatus.OK);
 	}
+	
+	// servicio para eliminar un usuario
+		@RequestMapping(value = "/deleteUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
+		public ResponseEntity<?> deleteUsuario(@RequestParam Long id) {
+			Usuario us = userService.findBy(id);
+			System.out.println(us);
+			if (us == null) {
+				return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
+			}
+			userService.deleteUsuario(id);
+			return new ResponseEntity(new ErrorMessage2(0, "Usuario eliminado con exito!"), HttpStatus.OK);
+		}
+
 
 }
