@@ -1,5 +1,6 @@
 package com.encuentro.matrimonial.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
+import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.IUserRepository;
 import com.encuentro.matrimonial.security.BCryptPasswordEncoder;
@@ -30,6 +32,7 @@ import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @RestController
 @RequestMapping(ResourceMapping.USER)
