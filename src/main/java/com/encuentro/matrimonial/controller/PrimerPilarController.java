@@ -36,6 +36,11 @@ public class PrimerPilarController {
 	
 	@Autowired
 	IPrimerPilarRepository pilarDTO;
+	
+	@Autowired
+        private IPrimerPilarService pilarService;
+	
+	private List<PrimerPilar> listadoPilar = new ArrayList<PrimerPilar>();
 
 	// servicio que trae un fin de semana
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
