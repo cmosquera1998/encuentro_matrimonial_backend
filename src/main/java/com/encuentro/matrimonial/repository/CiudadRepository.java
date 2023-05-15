@@ -14,5 +14,8 @@ public interface CiudadRepository extends CrudRepository<Ciudad, Long> {
 
 	@Query(value = "SELECT c FROM Ciudad c WHERE c.pais.id = :idPais")
 	List<Ciudad> obtenerCiudadesPorPais(Long idPais);
+	
+	@Query(value = "SELECT c FROM Ciudad c WHERE c.id = :idCiudad")
+	List<Ciudad> obtenerCiudadUsuario(Long idCiudad);
 
 }
