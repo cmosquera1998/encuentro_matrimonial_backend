@@ -45,8 +45,6 @@ public class FormacionSacerdoteController {
 	@Autowired
 	private IUserService userService;
 	
-	private List<FormacionSacerdote> listadoFormacion = new ArrayList<FormacionSacerdote>();
-
 	//servicio que trae una formacion  de sacerdote
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
@@ -69,8 +67,10 @@ public class FormacionSacerdoteController {
 	public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			us.ifPresent(usuario -> {
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
 				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<FormacionSacerdote> listadoFormacion = new ArrayList<FormacionSacerdote>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
 					if (primerRol.getName().equals("ROLE_ADMIN")) {
@@ -81,14 +81,19 @@ public class FormacionSacerdoteController {
 						listadoFormacion = formacionDTO.obtenerFormacionPorCiudad(usuario.getCiudad().getId());
 					}
 				}
-			});
-			ErrorMessage<List<FormacionSacerdote>> error = listadoFormacion.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de sacerdotes", listadoFormacion);
-			return ResponseEntity.ok().body(error);
+				ErrorMessage<List<FormacionSacerdote>> lista = listadoFormacion.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de sacerdotes", listadoFormacion);
+				return ResponseEntity.ok().body(lista);
+			} else {
+				ErrorMessage<List<FormacionSacerdote>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND,
+						Mensaje.NOT_FOUND, null);
+				return ResponseEntity.ok(error);
+			}
 		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<FormacionSacerdote>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER,
+					e.getMessage(), null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}

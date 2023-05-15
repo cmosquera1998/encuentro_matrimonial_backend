@@ -49,8 +49,6 @@ public class UsuarioController {
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
-	private List<Usuario> listadoUser = new ArrayList<Usuario>();
-
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	// servicio que trae un usuario 
@@ -82,25 +80,35 @@ public class UsuarioController {
 	// servicio que trae el listado de usuarios
 	@RequestMapping(value = "/getUsuarios", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<Usuario>>> getUser(@RequestParam Long id) {
-		Optional<Usuario> us = userService.findByIdUsuario(id);
-		us.ifPresent(usuario -> {
-			List<Role> roles = (List<Role>) usuario.getRoles();
-			if (!roles.isEmpty()) {
-				Role primerRol = roles.get(0);
-				if (primerRol.getName().equals("ROLE_ADMIN")) {
-					listadoUser = userDao.obtenerUsuariosPorPais(usuario.getCiudad().getPais().getId());
-				} else if (primerRol.getName().equals("ROLE_LATAM")) {
-					listadoUser = userService.getUsuarios();
-				} else {
-					listadoUser = userDao.obtenerUsuariosPorCiudad(usuario.getCiudad().getId());
+		try {
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<Usuario> listadoUser = new ArrayList<Usuario>();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_ADMIN")) {
+						listadoUser = userDao.obtenerUsuariosPorPais(usuario.getCiudad().getPais().getId());
+					} else if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoUser = userService.getUsuarios();
+					} else {
+						listadoUser = userDao.obtenerUsuariosPorCiudad(usuario.getCiudad().getId());
+					}
 				}
+				ErrorMessage<List<Usuario>> lista = listadoUser.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Usuarios", listadoUser);
+				return ResponseEntity.ok(lista);
+			} else {
+				ErrorMessage<List<Usuario>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null);
+				return ResponseEntity.ok(error);
 			}
-		});
-
-		ErrorMessage<List<Usuario>> error = listadoUser.isEmpty()
-				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de Usuarios cantidad-->" +listadoUser.size(), listadoUser);
-		return new ResponseEntity<>(error, HttpStatus.OK);
+		} catch (Exception e) {
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<Usuario>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			return ResponseEntity.internalServerError().body(body);
+		}
 	}
 
 	// servicio para crear un usuario

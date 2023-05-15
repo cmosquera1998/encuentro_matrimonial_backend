@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
 import com.encuentro.matrimonial.modelo.Ciudad;
 import com.encuentro.matrimonial.modelo.Pais;
@@ -42,50 +42,70 @@ public class UbicacionController {
 	@Autowired
 	private IUserService userService;
 
-	private List<Pais> listadoPises = new ArrayList<Pais>();
-
-	private List<Ciudad> listadoCiudades = new ArrayList<Ciudad>();
-
 	@RequestMapping(value = "/getPaises", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<Pais>>> getPaises(@RequestParam Long id) {
-		Optional<Usuario> us = userService.findByIdUsuario(id);
-		us.ifPresent(usuario -> {
-			List<Role> roles = (List<Role>) usuario.getRoles();
-			if (!roles.isEmpty()) {
-				Role primerRol = roles.get(0);
-				if (primerRol.getName().equals("ROLE_LATAM")) {
-					listadoPises = paisRepository.findAll();
-				} else {
-					listadoPises = paisRepository.findById(usuario.getCiudad().getPais().getId());
+		try {
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<Pais> listadoPises = new ArrayList<Pais>();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoPises = paisRepository.findAll();
+					} else {
+						listadoPises = paisRepository.findById(usuario.getCiudad().getPais().getId());
+					}
 				}
+
+				ErrorMessage<List<Pais>> lista = listadoPises.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Paises", listadoPises);
+				return ResponseEntity.ok(lista);
+			} else {
+				ErrorMessage<List<Pais>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null);
+				return ResponseEntity.ok(error);
 			}
-		});
-		ErrorMessage<List<Pais>> error = listadoPises.isEmpty()
-				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de Paises", listadoPises);
-		return new ResponseEntity<>(error, HttpStatus.OK);
+		} catch (Exception e) {
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<Pais>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			return ResponseEntity.internalServerError().body(body);
+		}
 	}
 
 	@RequestMapping(value = "/getCiudadPaises", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<Ciudad>>> getCiudadPaises(@RequestParam Long id) {
-		Optional<Usuario> us = userService.findByIdUsuario(id);
-		us.ifPresent(usuario -> {
-			List<Role> roles = (List<Role>) usuario.getRoles();
-			if (!roles.isEmpty()) {
-				Role primerRol = roles.get(0);
-				if (primerRol.getName().equals("ROLE_ADMIN")) {
-					listadoCiudades = ciudadRepository.obtenerCiudadesPorPais(usuario.getCiudad().getPais().getId());
-				} else if (primerRol.getName().equals("ROLE_LATAM")) {
-					listadoCiudades = (List<Ciudad>) ciudadRepository.findAll();
-				} else {
-					listadoCiudades = ciudadRepository.obtenerCiudadUsuario(usuario.getCiudad().getId());
+		try {
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<Ciudad> listadoCiudades = new ArrayList<Ciudad>();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_ADMIN")) {
+						listadoCiudades = ciudadRepository
+								.obtenerCiudadesPorPais(usuario.getCiudad().getPais().getId());
+					} else if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoCiudades = (List<Ciudad>) ciudadRepository.findAll();
+					} else {
+						listadoCiudades = ciudadRepository.obtenerCiudadUsuario(usuario.getCiudad().getId());
+					}
 				}
-			}
-		});
-		ErrorMessage<List<Ciudad>> error = listadoCiudades.isEmpty()
-				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de ciudades", listadoCiudades);
-		return new ResponseEntity<>(error, HttpStatus.OK);
-	}
+				ErrorMessage<List<Ciudad>> lista = listadoCiudades.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(0, "Lista de ciudades", listadoCiudades);
 
+				return ResponseEntity.ok(lista);
+			} else {
+				ErrorMessage<List<Ciudad>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null);
+				return ResponseEntity.ok(error);
+			}
+		} catch (Exception e) {
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<Ciudad>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			return ResponseEntity.internalServerError().body(body);
+		}
+	}
 }

@@ -45,8 +45,6 @@ public class FormacionMatrimonioController {
 	@Autowired
 	private IUserService userService;
 	
-	private List<FormacionMatrimonio> listadoFormacion = new ArrayList<FormacionMatrimonio>();
-
 	//servicio que trae una formacion  de matrimonio
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
@@ -69,8 +67,10 @@ public class FormacionMatrimonioController {
 	public ResponseEntity<ErrorMessage<List<FormacionMatrimonio>>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			us.ifPresent(usuario -> {
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
 				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<FormacionMatrimonio> listadoFormacion = new ArrayList<FormacionMatrimonio>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
 					if (primerRol.getName().equals("ROLE_ADMIN")) {
@@ -81,19 +81,23 @@ public class FormacionMatrimonioController {
 						listadoFormacion = formacionDTO.obtenerFormacionPorCiudad(usuario.getCiudad().getId());
 					}
 				}
-			});
-			ErrorMessage<List<FormacionMatrimonio>> error = listadoFormacion.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de matrimonios", listadoFormacion);
-			return ResponseEntity.ok().body(error);
+				ErrorMessage<List<FormacionMatrimonio>> lista = listadoFormacion.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de matrimonios", listadoFormacion);
+				return ResponseEntity.ok().body(lista);
+			} else {
+				ErrorMessage<List<FormacionMatrimonio>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND,
+						Mensaje.NOT_FOUND, null);
+				return ResponseEntity.ok(error);
+			}
 		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<FormacionMatrimonio>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER,
+					e.getMessage(), null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
 	
-		
 		// servicio que trae el listado de fines de semana por zona
 		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
 		public ResponseEntity<ErrorMessage<List<FormacionMatrimonio>>> getAllZona(@RequestParam Long idZona) {

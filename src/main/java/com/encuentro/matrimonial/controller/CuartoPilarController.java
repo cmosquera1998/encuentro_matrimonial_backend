@@ -44,8 +44,6 @@ public class CuartoPilarController {
 	@Autowired
 	private IUserService userService;
 	
-	private List<CuartoPilar> listadoPilar = new ArrayList<CuartoPilar>();
-
 	// servicio que trae el post encuentro
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
@@ -67,8 +65,10 @@ public class CuartoPilarController {
 	public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			us.ifPresent(usuario -> {
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
 				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<CuartoPilar> listadoPilar = new ArrayList<CuartoPilar>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
 					if (primerRol.getName().equals("ROLE_ADMIN")) {
@@ -79,15 +79,20 @@ public class CuartoPilarController {
 						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
 					}
 				}
-			});
 
-			ErrorMessage<List<CuartoPilar>> error = listadoPilar.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
-			return ResponseEntity.ok().body(error);
+				ErrorMessage<List<CuartoPilar>> lista = listadoPilar.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
+				return ResponseEntity.ok().body(lista);
+			} else {
+				ErrorMessage<List<CuartoPilar>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND,
+						null);
+				return ResponseEntity.ok(error);
+			}
 		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<CuartoPilar>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(),
+					null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}

@@ -41,8 +41,6 @@ public class PrimerPilarController {
 	@Autowired
 	private IUserService userService;
 	
-	private List<PrimerPilar> listadoPilar = new ArrayList<PrimerPilar>();
-	
 	@Autowired
 	IPrimerPilarRepository pilarDTO;
 
@@ -78,13 +76,16 @@ public class PrimerPilarController {
 		}
 	}*/
 	
-	//servicio que trae el listado de fines de semana dependiendo el rol puede trar por la ciudad  , todos en general  o por pais 
+	//servicio que trae el listado de fines de semana dependiendo el rol puede trar por la ciudad  , todos en general  o por pais 	
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			us.ifPresent(usuario -> {
+			if (us.isPresent()) {
+				Usuario usuario = us.get();
 				List<Role> roles = (List<Role>) usuario.getRoles();
+				List<PrimerPilar> listadoPilar = new ArrayList<>();
+
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
 					if (primerRol.getName().equals("ROLE_ADMIN")) {
@@ -95,17 +96,23 @@ public class PrimerPilarController {
 						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
 					}
 				}
-			});
-			ErrorMessage<List<PrimerPilar>> error = listadoPilar.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
-			return ResponseEntity.ok().body(error);
+
+				ErrorMessage<List<PrimerPilar>> lista = listadoPilar.isEmpty()
+						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares", listadoPilar);
+				return ResponseEntity.ok(lista);
+			} else {
+				ErrorMessage<List<PrimerPilar>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND,null);
+				return ResponseEntity.ok(error);
+			}
 		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			log.error("Error: " + e.getMessage());
+			ErrorMessage<List<PrimerPilar>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(),
+					null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
+
 
 		
 		// servicio que trae el listado de fines de semana por zona pais
