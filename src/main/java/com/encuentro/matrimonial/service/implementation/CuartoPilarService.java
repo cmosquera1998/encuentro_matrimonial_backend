@@ -31,11 +31,6 @@ public class CuartoPilarService implements ICuartoPilarService {
 	}
 
 	@Override
-	public List<CuartoPilar> findByFiltroCuartoPilar(String fecha) {
-		return (List<CuartoPilar>) pilarDTO.findByFiltroCuartoPilar(fecha);
-	}
-
-	@Override
 	public CuartoPilar update(CuartoPilar pilar) {
 		return pilarDTO.save(pilar);
 	}

@@ -1,5 +1,6 @@
 package com.encuentro.matrimonial.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,8 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
 import com.encuentro.matrimonial.modelo.CuartoPilar;
+import com.encuentro.matrimonial.modelo.Role;
+import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.ICuartoPilarRepository;
 import com.encuentro.matrimonial.service.ICuartoPilarService;
+import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
 
@@ -36,6 +40,11 @@ public class CuartoPilarController {
 	
 	@Autowired
 	ICuartoPilarRepository pilarDTO;
+	
+	@Autowired
+	private IUserService userService;
+	
+	private List<CuartoPilar> listadoPilar = new ArrayList<CuartoPilar>();
 
 	// servicio que trae el post encuentro
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -55,12 +64,26 @@ public class CuartoPilarController {
 
 	// servicio que trae el listado de post encuentro
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAll() {
+	public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAll(@RequestParam Long id) {
 		try {
-			List<CuartoPilar> listado = pilarService.getAll();
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			us.ifPresent(usuario -> {
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_ADMIN")) {
+						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
+					} else if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoPilar = pilarService.getAll();
+					} else {
+						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
+					}
+				}
+			});
+
+			ErrorMessage<List<CuartoPilar>> error = listadoPilar.isEmpty()
 					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
 			return ResponseEntity.ok().body(error);
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -68,26 +91,7 @@ public class CuartoPilarController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-	
-	//servicio que trae el listado de de post encuentro por pais
-		@RequestMapping(value = "/getAllPais", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAllPais(@RequestParam Long idPais) {
-			List<CuartoPilar> listado = pilarDTO.obtenerPilarPorPais(idPais);
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares pais", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 
-		//servicio que trae el listado de de post encuentro por ciudad
-		@RequestMapping(value = "/getAllCiudad", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAllCiudad(@RequestParam Long idCiudad) {
-			List<CuartoPilar> listado = pilarDTO.obtenerPilarPorCiudad(idCiudad);
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares ciudad", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 		
 		// servicio que trae el listado de de post encuentro por zona
 		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -99,23 +103,7 @@ public class CuartoPilarController {
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 
-	// servicio que trae el listado de post encuentro por fecha
-	@RequestMapping(value = "/getFilter", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<?> getFilter(@RequestParam String dateString) {
-		log.debug("Fecha:-" + dateString);
-		try {
-			List<CuartoPilar> listado = pilarService.findByFiltroCuartoPilar(dateString);
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
-			return ResponseEntity.ok().body(error);
-		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage2 body = new ErrorMessage2(Mensaje.CODE_INTERNAL_SERVER, e.getMessage());
-			return ResponseEntity.internalServerError().body(body);
-		}
-	}
-
+	
 	// servicio para crear un post encuentro
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<?> create(@RequestBody CuartoPilar pilar) {

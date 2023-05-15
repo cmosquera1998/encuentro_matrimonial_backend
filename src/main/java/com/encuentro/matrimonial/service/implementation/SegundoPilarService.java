@@ -31,11 +31,6 @@ public class SegundoPilarService implements ISegundoPilarService {
 	}
 
 	@Override
-	public List<SegundoPilar> findByFiltroSegundoPilar(String fecha) {
-		return (List<SegundoPilar>) pilarDTO.findByFiltroSegundoPilar(fecha);
-	}
-
-	@Override
 	public SegundoPilar update(SegundoPilar pilar) {
 		return pilarDTO.save(pilar);
 	}

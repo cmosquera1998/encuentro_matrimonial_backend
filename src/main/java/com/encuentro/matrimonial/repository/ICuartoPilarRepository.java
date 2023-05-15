@@ -13,9 +13,6 @@ public interface ICuartoPilarRepository extends CrudRepository<CuartoPilar, Long
 	@Query("Select c FROM cuarto_pilar c WHERE c.id = :id")
 	CuartoPilar findByCuartoPilar(@Param("id") Long id);
 
-	@Query("Select c FROM cuarto_pilar c WHERE c.fechaCreacion = :fecha")
-	CuartoPilar findByFiltroCuartoPilar(@Param("fecha") String fecha);
-
 	@Query(value = "SELECT c FROM cuarto_pilar c WHERE c.ciudad.pais.id = :idPais")
 	List<CuartoPilar> obtenerPilarPorPais(Long idPais);
 

@@ -1,5 +1,6 @@
 package com.encuentro.matrimonial.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,9 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
+import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.SegundoPilar;
+import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.ISegundoPilarRepository;
 import com.encuentro.matrimonial.service.ISegundoPilarService;
+import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
 
@@ -36,6 +40,11 @@ public class SegundoPilarController {
 	
 	@Autowired
 	ISegundoPilarRepository pilarDTO;
+	
+	@Autowired
+	private IUserService userService;
+	
+	private List<SegundoPilar> listadoPilar = new ArrayList<SegundoPilar>();
 
 	// servicio que trae un matrimonio servidor del fds
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -55,12 +64,25 @@ public class SegundoPilarController {
 
 	// servicio que trae el listado de matrimonios servidores del fds
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<SegundoPilar>>> getAll() {
+	public ResponseEntity<ErrorMessage<List<SegundoPilar>>> getAll(@RequestParam Long id) {
 		try {
-			List<SegundoPilar> listado = pilarService.getAll();
-			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			us.ifPresent(usuario -> {
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_ADMIN")) {
+						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
+					} else if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoPilar = pilarService.getAll();
+					} else {
+						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
+					}
+				}
+			});
+			ErrorMessage<List<SegundoPilar>> error = listadoPilar.isEmpty()
 					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
 			return ResponseEntity.ok().body(error);
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -68,26 +90,6 @@ public class SegundoPilarController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-	
-	//servicio que trae el listado de matrimonios servidores del fds por pais
-		@RequestMapping(value = "/getAllPais", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<SegundoPilar>>> getAllPais(@RequestParam Long idPais) {
-			List<SegundoPilar> listado = pilarDTO.obtenerPilarPorPais(idPais);
-			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares por pais", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
-
-		//servicio que trae el listado matrimonios servidores del fds por ciudad
-		@RequestMapping(value = "/getAllCiudad", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<SegundoPilar>>> getAllCiudad(@RequestParam Long idCiudad) {
-			List<SegundoPilar> listado = pilarDTO.obtenerPilarPorCiudad(idCiudad);
-			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares por ciudad", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 		
 		// servicio que trae el listado matrimonios servidores del fds por zona
 		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -99,22 +101,6 @@ public class SegundoPilarController {
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 
-	// servicio que trae el listado de matrimonios servidores del fds por fecha
-	@RequestMapping(value = "/getFilter", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<?> getFilter(@RequestParam String dateString) {
-		log.debug("Fecha:-" + dateString);
-		try {
-			List<SegundoPilar> listado = pilarService.findByFiltroSegundoPilar(dateString);
-			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
-			return ResponseEntity.ok().body(error);
-		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage2 body = new ErrorMessage2(Mensaje.CODE_INTERNAL_SERVER, e.getMessage());
-			return ResponseEntity.internalServerError().body(body);
-		}
-	}
 
 	// servicio para crear un matrimonio servidor para el fds
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

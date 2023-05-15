@@ -63,7 +63,7 @@ public class PrimerPilarController {
 	}
 
 	// servicio que trae el listado de fines de semana
-	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
+	/*@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAll() {
 		try {
 			List<PrimerPilar> listado = pilarService.getAll();
@@ -76,11 +76,11 @@ public class PrimerPilarController {
 			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
 			return ResponseEntity.internalServerError().body(body);
 		}
-	}
+	}*/
 	
-	// servicio que trae el listado de fines de semana
-	@RequestMapping(value = "/getAllPrueba", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllPrueba(@RequestParam Long id) {
+	//servicio que trae el listado de fines de semana dependiendo el rol puede trar por la ciudad  , todos en general  o por pais 
+	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
 			us.ifPresent(usuario -> {
@@ -122,30 +122,11 @@ public class PrimerPilarController {
 		@RequestMapping(value = "/getAllZonaLatam", method = RequestMethod.GET, headers = "Accept=application/json")
 		public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllZonaLatam(@RequestParam Long idZona) {
 			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorZonaLatam(idZona);
-			System.out.println("validate fecha:-->" + listado.get(0).getFechaCreacion());
-			System.out.println("validate id:-->" + listado.get(0).getId());
 			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
 					: new ErrorMessage<>(0, "Lista de pilares por zona en latam", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
-
-	// servicio que trae el listado de fines de semana por fecha
-	@RequestMapping(value = "/getFilter", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<?> getFilter(@RequestParam String dateString) {
-		log.debug("Fecha:-" + dateString);
-		try {
-			List<PrimerPilar> listado = pilarService.findByFiltroPrimerPilar(dateString);
-			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
-			return ResponseEntity.ok().body(error);
-		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage2 body = new ErrorMessage2(Mensaje.CODE_INTERNAL_SERVER, e.getMessage());
-			return ResponseEntity.internalServerError().body(body);
-		}
-	}
 
 	// servicio para crear un fin de semana
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

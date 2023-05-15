@@ -13,9 +13,6 @@ public interface IFormacionSacerdoteRepository extends CrudRepository<FormacionS
 	@Query("Select f FROM FormacionSacerdote f WHERE f.id = :id")
 	FormacionSacerdote findByFormacionSacerdote(@Param("id") Long id);
 
-	@Query("Select f FROM FormacionSacerdote f WHERE f.fechaCreacion = :fecha")
-	FormacionSacerdote findByFiltroFormacionSacerdote(@Param("fecha") String fecha);
-
 	@Query(value = "SELECT f FROM FormacionSacerdote f WHERE f.ciudad.pais.id = :idPais")
 	List<FormacionSacerdote> obtenerFormacionPorPais(Long idPais);
 

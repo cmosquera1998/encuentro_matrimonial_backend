@@ -30,10 +30,6 @@ public class TercerPilarService implements ITercerPilarService {
 		return pilarDTO.findByTercerPilar(id);
 	}
 
-	@Override
-	public List<TercerPilar> findByFiltroTercerPilar(String fecha) {
-		return (List<TercerPilar>) pilarDTO.findByFiltroTercerPilar(fecha);
-	}
 
 	@Override
 	public TercerPilar update(TercerPilar pilar) {

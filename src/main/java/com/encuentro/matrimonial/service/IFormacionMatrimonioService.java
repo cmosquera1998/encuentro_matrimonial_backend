@@ -12,8 +12,6 @@ public interface IFormacionMatrimonioService {
 
 	FormacionMatrimonio findByFormacionMatrimonio(Long id);
 
-	List<FormacionMatrimonio> findByFiltroFormacionMatrimonio(String fecha);
-
 	FormacionMatrimonio update(FormacionMatrimonio pilar);
 
 	void delete(Long id);

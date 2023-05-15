@@ -12,8 +12,6 @@ public interface IPrimerPilarService {
 
 	PrimerPilar findByPrimerPilar(Long id);
 
-	List<PrimerPilar> findByFiltroPrimerPilar(String fecha);
-
 	PrimerPilar update(PrimerPilar pilar);
 
 	void delete(Long id);

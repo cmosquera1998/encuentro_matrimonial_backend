@@ -31,11 +31,6 @@ public class PrimerPilarService implements IPrimerPilarService {
 	}
 
 	@Override
-	public List<PrimerPilar> findByFiltroPrimerPilar(String fecha) {
-		return (List<PrimerPilar>) pilarDTO.findByFiltroPrimerPilar(fecha);
-	}
-
-	@Override
 	public PrimerPilar update(PrimerPilar pilar) {
 		return pilarDTO.save(pilar);
 	}

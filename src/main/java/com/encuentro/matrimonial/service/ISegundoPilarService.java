@@ -12,8 +12,6 @@ public interface ISegundoPilarService {
 
 	SegundoPilar findBySegundoPilar(Long id);
 
-	List<SegundoPilar> findByFiltroSegundoPilar(String fecha);
-
 	SegundoPilar update(SegundoPilar pilar);
 
 	void delete(Long id);

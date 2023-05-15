@@ -31,11 +31,6 @@ public class FormacionMatrimonioService implements IFormacionMatrimonioService {
 	}
 
 	@Override
-	public List<FormacionMatrimonio> findByFiltroFormacionMatrimonio(String fecha) {
-		return (List<FormacionMatrimonio>) formacionDTO.findByFiltroFormacionMatrimonio(fecha);
-	}
-
-	@Override
 	public FormacionMatrimonio update(FormacionMatrimonio pilar) {
 		return formacionDTO.save(pilar);
 	}

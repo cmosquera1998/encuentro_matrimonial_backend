@@ -12,8 +12,6 @@ public interface ITercerPilarService {
 
 	TercerPilar findByTercerPilar(Long id);
 
-	List<TercerPilar> findByFiltroTercerPilar(String fecha);
-
 	TercerPilar update(TercerPilar pilar);
 
 	void delete(Long id);

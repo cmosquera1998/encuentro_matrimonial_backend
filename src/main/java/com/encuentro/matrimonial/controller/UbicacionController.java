@@ -18,6 +18,7 @@ import com.encuentro.matrimonial.modelo.Ciudad;
 import com.encuentro.matrimonial.modelo.Pais;
 import com.encuentro.matrimonial.repository.CiudadRepository;
 import com.encuentro.matrimonial.repository.PaisRepository;
+import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 
 
@@ -34,6 +35,9 @@ public class UbicacionController {
 	
 	@Autowired
 	private PaisRepository paisRepository;
+	
+	@Autowired
+	private IUserService userService;
 
 	@RequestMapping(value = "/getPaises", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<Pais>>> getPaises() {

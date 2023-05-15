@@ -12,8 +12,6 @@ public interface IFormacionSacerdoteService {
 
 	FormacionSacerdote findByFormacionSacerdote(Long id);
 
-	List<FormacionSacerdote> findByFiltroFormacionSacerdote(String fecha);
-
 	FormacionSacerdote update(FormacionSacerdote pilar);
 
 	void delete(Long id);

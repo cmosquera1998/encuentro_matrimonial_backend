@@ -31,11 +31,6 @@ public class FormacionSacerdoteService implements IFormacionSacerdoteService {
 	}
 
 	@Override
-	public List<FormacionSacerdote> findByFiltroFormacionSacerdote(String fecha) {
-		return (List<FormacionSacerdote>) formacionDTO.findByFiltroFormacionSacerdote(fecha);
-	}
-
-	@Override
 	public FormacionSacerdote update(FormacionSacerdote pilar) {
 		return formacionDTO.save(pilar);
 	}

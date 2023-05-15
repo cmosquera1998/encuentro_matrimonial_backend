@@ -131,10 +131,10 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		Ciudad ciudadMedellin = ciudadRepository.findByName("MEDELLIN");
 		Ciudad ciudadLima = ciudadRepository.findByName("LIMA");
 
-		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
-		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
-		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadMedellin);
-		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadLima);
+		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
+		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
+		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadMedellin);
+		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadLima);
 		
 		
 		if (userRepository.findByUser("Cmosquera") == null) {

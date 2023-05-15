@@ -12,10 +12,7 @@ public interface ISegundoPilarRepository extends CrudRepository<SegundoPilar, Lo
 
 	@Query("Select s FROM segundo_pilar s WHERE s.id = :id")
 	SegundoPilar findBySegundoPilar(@Param("id") Long id);
-
-	@Query("Select s FROM segundo_pilar s WHERE s.fechaCreacion = :fecha")
-	SegundoPilar findByFiltroSegundoPilar(@Param("fecha") String fecha);
-
+	
 	@Query(value = "SELECT s FROM segundo_pilar s WHERE s.ciudad.pais.id = :idPais")
 	List<SegundoPilar> obtenerPilarPorPais(Long idPais);
 

@@ -1,5 +1,6 @@
 package com.encuentro.matrimonial.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
 import com.encuentro.matrimonial.modelo.FormacionSacerdote;
+import com.encuentro.matrimonial.modelo.Role;
+import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.IFormacionSacerdoteRepository;
 import com.encuentro.matrimonial.service.IFormacionSacerdoteService;
+import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
 
@@ -37,6 +41,11 @@ public class FormacionSacerdoteController {
 	
 	@Autowired
 	IFormacionSacerdoteRepository formacionDTO;
+	
+	@Autowired
+	private IUserService userService;
+	
+	private List<FormacionSacerdote> listadoFormacion = new ArrayList<FormacionSacerdote>();
 
 	//servicio que trae una formacion  de sacerdote
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -57,12 +66,25 @@ public class FormacionSacerdoteController {
 
 	//servicio que trae el listado de formacion  de sacerdotes
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAll() {
+	public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAll(@RequestParam Long id) {
 		try {
-			List<FormacionSacerdote> listado = formacionService.getAll();
-			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			us.ifPresent(usuario -> {
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_ADMIN")) {
+						listadoFormacion = formacionDTO.obtenerFormacionPorPais(usuario.getCiudad().getPais().getId());
+					} else if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoFormacion = formacionService.getAll();
+					} else {
+						listadoFormacion = formacionDTO.obtenerFormacionPorCiudad(usuario.getCiudad().getId());
+					}
+				}
+			});
+			ErrorMessage<List<FormacionSacerdote>> error = listadoFormacion.isEmpty()
 					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de sacerdotes", listado);
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de sacerdotes", listadoFormacion);
 			return ResponseEntity.ok().body(error);
 		} catch (Exception e) {
 			log.error("Error:-" + e.getMessage());
@@ -70,26 +92,6 @@ public class FormacionSacerdoteController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-	
-	//servicio que trae el listado de formacion  de sacerdotes por pais
-		@RequestMapping(value = "/getAllPais", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAllPais(@RequestParam Long idPais) {
-			List<FormacionSacerdote> listado = formacionDTO.obtenerFormacionPorPais(idPais);
-			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
-
-		//servicio que trae el listado de formacion  de sacerdotes por ciudad
-		@RequestMapping(value = "/getAllCiudad", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAllCiudad(@RequestParam Long idCiudad) {
-			List<FormacionSacerdote> listado = formacionDTO.obtenerFormacionPorCiudad(idCiudad);
-			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por ciudad", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 		
 		// servicio que trae el listado de formacion de sacerdotes por zona
 		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -100,24 +102,6 @@ public class FormacionSacerdoteController {
 					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por zona", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
-		
-
-	//servicio que trae el listado de formacion  de sacerdotes por fecha
-	@RequestMapping(value = "/getFilter", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<?> getFilter(@RequestParam String dateString) {
-		log.debug("Fecha:-" + dateString);
-		try {
-			List<FormacionSacerdote> listado = formacionService.findByFiltroFormacionSacerdote(dateString);
-			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de sacerdotes", listado);
-			return ResponseEntity.ok().body(error);
-		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage2 body = new ErrorMessage2(Mensaje.CODE_INTERNAL_SERVER, e.getMessage());
-			return ResponseEntity.internalServerError().body(body);
-		}
-	}
 
 	//servicio para crear una formacion  de sacerdote
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

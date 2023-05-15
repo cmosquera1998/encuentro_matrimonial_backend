@@ -13,9 +13,6 @@ public interface IPrimerPilarRepository extends CrudRepository<PrimerPilar, Long
 	@Query("Select p FROM primer_pilar p WHERE p.id = :id")
 	PrimerPilar findByPrimerPilar(@Param("id") Long id);
 
-	@Query("Select p FROM primer_pilar p WHERE p.fechaCreacion = :fecha")
-	PrimerPilar findByFiltroPrimerPilar(@Param("fecha") String fecha);
-
 	@Query(value = "SELECT p FROM primer_pilar p WHERE p.ciudad.pais.id = :idPais")
 	List<PrimerPilar> obtenerPilarPorPais(Long idPais);
 

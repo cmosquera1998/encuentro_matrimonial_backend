@@ -12,10 +12,7 @@ public interface ITercerPilarRepository extends CrudRepository<TercerPilar, Long
 
 	@Query("Select t FROM tercer_pilar t WHERE t.id = :id")
 	TercerPilar findByTercerPilar(@Param("id") Long id);
-
-	@Query("Select t FROM tercer_pilar t WHERE t.fechaCreacion = :fecha")
-	TercerPilar findByFiltroTercerPilar(@Param("fecha") String fecha);
-
+	
 	@Query(value = "SELECT t FROM tercer_pilar t WHERE t.ciudad.pais.id = :idPais")
 	List<TercerPilar> obtenerPilarPorPais(Long idPais);
 

@@ -12,8 +12,6 @@ public interface ICuartoPilarService {
 
 	CuartoPilar findByCuartoPilar(Long id);
 
-	List<CuartoPilar> findByFiltroCuartoPilar(String fecha);
-
 	CuartoPilar update(CuartoPilar pilar);
 
 	void delete(Long id);
