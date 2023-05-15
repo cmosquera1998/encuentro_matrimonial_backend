@@ -47,6 +47,9 @@ public class UsuarioController {
 	
 	ObjectMapper mapper = new ObjectMapper();
 
+	
+	private List<Usuario> listadoUser = new ArrayList<Usuario>();
+
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	// servicio que trae un usuario 
