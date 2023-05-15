@@ -137,7 +137,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadLima);
 		
 		
-		if (userRepository.findByUser("Admin") == null) {
+		if (userRepository.findByUser("Cmosquera") == null) {
 			Usuario user = new Usuario();
 	        user.setId(0L);
 	        user.setName("Super Admin");
