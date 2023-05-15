@@ -184,5 +184,33 @@ public class PrimerPilarController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
+// servicio que trae el listado de fines de semana
+	@RequestMapping(value = "/getAllPrueba", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllPrueba(@RequestParam Long id) {
+		try {
+			Optional<Usuario> us = userService.findByIdUsuario(id);
+			us.ifPresent(usuario -> {
+				List<Role> roles = (List<Role>) usuario.getRoles();
+				if (!roles.isEmpty()) {
+					Role primerRol = roles.get(0);
+					if (primerRol.getName().equals("ROLE_ADMIN")) {
+						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
+					} else if (primerRol.getName().equals("ROLE_LATAM")) {
+						listadoPilar = pilarService.getAll();
+					} else {
+						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
+					}
+				}
+			});
+			ErrorMessage<List<PrimerPilar>> error = listadoPilar.isEmpty()
+					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
+			return ResponseEntity.ok().body(error);
+		} catch (Exception e) {
+			log.error("Error:-" + e.getMessage());
+			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
+			return ResponseEntity.internalServerError().body(body);
+		}
+	}
 
 }
