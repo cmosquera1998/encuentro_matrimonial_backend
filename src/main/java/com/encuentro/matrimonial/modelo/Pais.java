@@ -3,6 +3,9 @@ package com.encuentro.matrimonial.modelo;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,4 +29,7 @@ public class Pais {
 	@Column
 	private String name;
 
+	@ManyToOne
+	@JoinColumn(name = "zona_id")
+	private Zona zona;
 }

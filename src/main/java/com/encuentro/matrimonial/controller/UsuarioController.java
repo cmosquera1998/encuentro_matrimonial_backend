@@ -4,9 +4,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,18 +28,15 @@ import com.encuentro.matrimonial.security.BCryptPasswordEncoder;
 import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping(ResourceMapping.USER)
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST,
 		RequestMethod.OPTIONS }, allowedHeaders = "*")
 public class UsuarioController {
- /*
-  * Tener encuenta la logica del rol principal , para realizar la gestion de usuarios
-  * Evaluar rol principal
-  * pais , departamento , zona  y lo que se requiera 
-  * 
-  * */
+
 	private static final Logger log = LoggerFactory.getLogger(UsuarioController.class);
 
 	@Autowired
@@ -44,13 +44,15 @@ public class UsuarioController {
 	
 	@Autowired
 	private IUserRepository userDao;
+	
+	ObjectMapper mapper = new ObjectMapper();
 
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 	// servicio que trae un usuario 
 		@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 		public ResponseEntity<?> get(@RequestParam Long id) {
-			log.debug("Id:-" + id);
+			log.debug("Id a consultar:-" + id);
 			try {
 				Usuario user = userService.findBy(id);
 				ErrorMessage<?> error = user == null ? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
@@ -92,33 +94,39 @@ public class UsuarioController {
 					: new ErrorMessage<>(0, "Lista de Usuarios", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
-
+	
 	// servicio para crear un usuario
 	@RequestMapping(value = "/createUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
-	public ResponseEntity<?> createUser(@RequestBody Usuario user) {
-		Usuario user2 = userService.findByUser(user.getUsername());
-		Usuario user3 = userService.findByDocumento(user.getDocument());
-		if (user2 != null || user3 != null) {
-			return new ResponseEntity(new ErrorMessage2(1, "El usuario ya se encuentra registrado"), HttpStatus.OK);
-		}
-
-		if (user.getName().isEmpty() || user.getLastname().isEmpty()) {
-			return new ResponseEntity(new ErrorMessage2(2, "información incompleta"), HttpStatus.OK);
-		}
-		user.setState(true);
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setCreationDate(new Date());
-		userService.createUsuario(user);
-		return new ResponseEntity(new ErrorMessage2(0, "Usuario creado con exito!"), HttpStatus.OK);
+	public ResponseEntity<ErrorMessage2> createUser(@Valid @RequestBody Usuario user) throws JsonProcessingException {
+		String request = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
+		log.info("Request createUsuario {}", request);
+	    Usuario user1 = userService.findByUser(user.getUsername());
+	    Usuario user2 = userService.findByDocumento(user.getDocument());
+	    if (user1 != null || user2 != null) {
+	        return ResponseEntity.ok(new ErrorMessage2(1, "El usuario ya se encuentra registrado"));
+	    }
+	    user.setState(true);
+	    user.setPassword(passwordEncoder.encode(user.getPassword()));
+	    user.setCreationDate(new Date());
+	    try {
+	        userService.createUsuario(user);
+	        return ResponseEntity.ok(new ErrorMessage2(0, "Usuario creado con éxito!"));
+	    } catch (DataAccessException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(new ErrorMessage2(3, "Ocurrió un error al crear el usuario"));
+	    }
 	}
 
 	// servicio para actualizar un usuario
 	@RequestMapping(value = "/updateUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
-	public ResponseEntity<?> updateUsuario(@RequestBody Usuario user) {
+	public ResponseEntity<?> updateUsuario(@Valid @RequestBody Usuario user) {
 		Optional<Usuario> us = userService.findByIdUsuario(user.getId());
 		if (!us.isPresent()) {
 			return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
 		}
+		if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+	        user.setPassword(passwordEncoder.encode(user.getPassword()));
+	    }
 		userService.updateUsuario(user);
 		return new ResponseEntity(new ErrorMessage2(0, "Usuario actualizado con exito!"), HttpStatus.OK);
 	}

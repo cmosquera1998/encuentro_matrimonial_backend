@@ -22,4 +22,10 @@ public interface IPrimerPilarRepository extends CrudRepository<PrimerPilar, Long
 	@Query(value = "SELECT p FROM primer_pilar p WHERE p.ciudad.id = :idCiudad")
 	List<PrimerPilar> obtenerPilarPorCiudad(Long idCiudad);
 
+	@Query(value = "SELECT p FROM primer_pilar p WHERE p.ciudad.zona.id = :idZona")
+	List<PrimerPilar> obtenerPilarPorZonaPais(Long idZona);
+
+	@Query(value = "SELECT p FROM primer_pilar p WHERE p.ciudad.pais.zona.id = :idZona")
+	List<PrimerPilar> obtenerPilarPorZonaLatam(Long idZona);
+
 }

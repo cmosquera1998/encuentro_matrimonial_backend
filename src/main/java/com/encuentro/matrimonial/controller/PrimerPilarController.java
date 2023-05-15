@@ -75,7 +75,7 @@ public class PrimerPilarController {
 			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorPais(idPais);
 			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares", listado);
+					: new ErrorMessage<>(0, "Lista de pilares pais", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 
@@ -85,7 +85,29 @@ public class PrimerPilarController {
 			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorCiudad(idCiudad);
 			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares", listado);
+					: new ErrorMessage<>(0, "Lista de pilares por ciudad", listado);
+			return new ResponseEntity<>(error, HttpStatus.OK);
+		}
+		
+		// servicio que trae el listado de fines de semana por zona pais
+		@RequestMapping(value = "/getAllZonaPais", method = RequestMethod.GET, headers = "Accept=application/json")
+		public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllZonaPais(@RequestParam Long idZona) {
+			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorZonaPais(idZona);
+			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
+					? new ErrorMessage<>(1, "No se ha encontrado información", null)
+					: new ErrorMessage<>(0, "Lista de pilares por zona en el pais", listado);
+			return new ResponseEntity<>(error, HttpStatus.OK);
+		}
+		
+		// servicio que trae el listado de fines de semana por zona
+		@RequestMapping(value = "/getAllZonaLatam", method = RequestMethod.GET, headers = "Accept=application/json")
+		public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllZonaLatam(@RequestParam Long idZona) {
+			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorZonaLatam(idZona);
+			System.out.println("validate fecha:-->" + listado.get(0).getFechaCreacion());
+			System.out.println("validate id:-->" + listado.get(0).getId());
+			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
+					? new ErrorMessage<>(1, "No se ha encontrado información", null)
+					: new ErrorMessage<>(0, "Lista de pilares por zona en latam", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 

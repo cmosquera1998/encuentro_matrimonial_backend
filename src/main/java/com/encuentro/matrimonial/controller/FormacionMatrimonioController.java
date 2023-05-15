@@ -77,7 +77,7 @@ public class FormacionMatrimonioController {
 			List<FormacionMatrimonio> listado = formacionDTO.obtenerFormacionPorPais(idPais);
 			ErrorMessage<List<FormacionMatrimonio>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Formacion de matrimonios", listado);
+					: new ErrorMessage<>(0, "Lista de Formacion de matrimonios por pais", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 
@@ -87,10 +87,19 @@ public class FormacionMatrimonioController {
 			List<FormacionMatrimonio> listado = formacionDTO.obtenerFormacionPorCiudad(idCiudad);
 			ErrorMessage<List<FormacionMatrimonio>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Formacion de matrimonios", listado);
+					: new ErrorMessage<>(0, "Lista de Formacion de matrimonios por ciudad", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 		
+		// servicio que trae el listado de fines de semana por zona
+		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
+		public ResponseEntity<ErrorMessage<List<FormacionMatrimonio>>> getAllZona(@RequestParam Long idZona) {
+			List<FormacionMatrimonio> listado = formacionDTO.obtenerPilarPorZona(idZona);
+			ErrorMessage<List<FormacionMatrimonio>> error = listado.isEmpty()
+					? new ErrorMessage<>(1, "No se ha encontrado información", null)
+					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por zona", listado);
+			return new ResponseEntity<>(error, HttpStatus.OK);
+		}
 
 	//servicio que trae el listado de formacion  de matrimonios por fecha
 	@RequestMapping(value = "/getFilter", method = RequestMethod.GET, headers = "Accept=application/json")

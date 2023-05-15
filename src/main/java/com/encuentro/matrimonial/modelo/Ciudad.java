@@ -31,5 +31,9 @@ public class Ciudad {
 	@ManyToOne
 	@JoinColumn(name = "pais_id")
 	private Pais pais;
+	
+	@ManyToOne
+	@JoinColumn(name = "zona_id")
+	private Zona zona;
 
 }

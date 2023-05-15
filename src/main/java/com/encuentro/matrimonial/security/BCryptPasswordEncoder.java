@@ -20,8 +20,6 @@ public class BCryptPasswordEncoder implements PasswordEncoder {
 
 	@Override
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
-		System.out.println(rawPassword);
-		System.out.println(encodedPassword);
 		return encodedPassword.equals(encode(rawPassword));
 	}
 

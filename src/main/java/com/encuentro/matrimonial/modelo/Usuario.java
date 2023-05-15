@@ -13,6 +13,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,24 +36,28 @@ public class Usuario {
 	private Long id;
 
 	@Column
+	@NotBlank
 	private String name;
 
 	@Column
 	private String lastname;
-	
+
 	@Column
 	private String email;
-	
+
 	@Column
 	private String telefono;
 
 	@Column(name = "username", unique = true)
+	@NotBlank
 	private String username;
 
 	@Column(nullable = false)
+	@NotBlank
 	private String password;
 
 	@Column(name = "document", unique = true)
+	@NotBlank
 	private String document;
 
 	@Column

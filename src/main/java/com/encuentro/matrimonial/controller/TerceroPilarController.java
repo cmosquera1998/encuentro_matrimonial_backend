@@ -75,7 +75,7 @@ public class TerceroPilarController {
 		List<TercerPilar> listado = pilarDTO.obtenerPilarPorPais(idPais);
 		ErrorMessage<List<TercerPilar>> error = listado.isEmpty()
 				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de pilares", listado);
+				: new ErrorMessage<>(0, "Lista de pilares por pais", listado);
 		return new ResponseEntity<>(error, HttpStatus.OK);
 	}
 
@@ -85,7 +85,17 @@ public class TerceroPilarController {
 		List<TercerPilar> listado = pilarDTO.obtenerPilarPorCiudad(idCiudad);
 		ErrorMessage<List<TercerPilar>> error = listado.isEmpty()
 				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de pilares", listado);
+				: new ErrorMessage<>(0, "Lista de pilares por ciudad", listado);
+		return new ResponseEntity<>(error, HttpStatus.OK);
+	}
+	
+	// servicio que trae el listado de estructuras por zona
+	@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<ErrorMessage<List<TercerPilar>>> getAllZona(@RequestParam Long idZona) {
+		List<TercerPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
+		ErrorMessage<List<TercerPilar>> error = listado.isEmpty()
+				? new ErrorMessage<>(1, "No se ha encontrado información", null)
+				: new ErrorMessage<>(0, "Lista de pilares por zona", listado);
 		return new ResponseEntity<>(error, HttpStatus.OK);
 	}
 

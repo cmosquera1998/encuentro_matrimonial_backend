@@ -75,7 +75,7 @@ public class SegundoPilarController {
 			List<SegundoPilar> listado = pilarDTO.obtenerPilarPorPais(idPais);
 			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares", listado);
+					: new ErrorMessage<>(0, "Lista de pilares por pais", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 
@@ -85,7 +85,17 @@ public class SegundoPilarController {
 			List<SegundoPilar> listado = pilarDTO.obtenerPilarPorCiudad(idCiudad);
 			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares", listado);
+					: new ErrorMessage<>(0, "Lista de pilares por ciudad", listado);
+			return new ResponseEntity<>(error, HttpStatus.OK);
+		}
+		
+		// servicio que trae el listado matrimonios servidores del fds por zona
+		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
+		public ResponseEntity<ErrorMessage<List<SegundoPilar>>> getAllZona(@RequestParam Long idZona) {
+			List<SegundoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
+			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
+					? new ErrorMessage<>(1, "No se ha encontrado información", null)
+					: new ErrorMessage<>(0, "Lista de pilares por zona", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 

@@ -87,7 +87,17 @@ public class FormacionSacerdoteController {
 			List<FormacionSacerdote> listado = formacionDTO.obtenerFormacionPorCiudad(idCiudad);
 			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes", listado);
+					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por ciudad", listado);
+			return new ResponseEntity<>(error, HttpStatus.OK);
+		}
+		
+		// servicio que trae el listado de formacion de sacerdotes por zona
+		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
+		public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAllZona(@RequestParam Long idZona) {
+			List<FormacionSacerdote> listado = formacionDTO.obtenerPilarPorZona(idZona);
+			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
+					? new ErrorMessage<>(1, "No se ha encontrado información", null)
+					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por zona", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 		

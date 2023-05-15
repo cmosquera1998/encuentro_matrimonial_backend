@@ -75,7 +75,7 @@ public class CuartoPilarController {
 			List<CuartoPilar> listado = pilarDTO.obtenerPilarPorPais(idPais);
 			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares", listado);
+					: new ErrorMessage<>(0, "Lista de pilares pais", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 
@@ -85,7 +85,17 @@ public class CuartoPilarController {
 			List<CuartoPilar> listado = pilarDTO.obtenerPilarPorCiudad(idCiudad);
 			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
 					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares", listado);
+					: new ErrorMessage<>(0, "Lista de pilares ciudad", listado);
+			return new ResponseEntity<>(error, HttpStatus.OK);
+		}
+		
+		// servicio que trae el listado de de post encuentro por zona
+		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
+		public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAllZona(@RequestParam Long idZona) {
+			List<CuartoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
+			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
+					? new ErrorMessage<>(1, "No se ha encontrado información", null)
+					: new ErrorMessage<>(0, "Lista de pilares por zona", listado);
 			return new ResponseEntity<>(error, HttpStatus.OK);
 		}
 

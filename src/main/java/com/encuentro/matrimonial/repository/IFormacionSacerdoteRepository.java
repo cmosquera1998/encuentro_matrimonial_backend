@@ -22,4 +22,7 @@ public interface IFormacionSacerdoteRepository extends CrudRepository<FormacionS
 	@Query(value = "SELECT f FROM FormacionSacerdote f WHERE f.ciudad.id = :idCiudad")
 	List<FormacionSacerdote> obtenerFormacionPorCiudad(Long idCiudad);
 
+	@Query(value = "SELECT f FROM FormacionSacerdote f WHERE f.ciudad.zona.id = :idZona")
+	List<FormacionSacerdote> obtenerPilarPorZona(Long idZona);
+
 }
