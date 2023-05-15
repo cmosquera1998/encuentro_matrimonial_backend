@@ -157,6 +157,30 @@ public class UsuarioController {
 			userService.deleteUsuario(id);
 			return new ResponseEntity(new ErrorMessage2(0, "Usuario eliminado con exito!"), HttpStatus.OK);
 		}
+ 
+	// servicio que trae el listado de usuarios
+	@RequestMapping(value = "/getUsuariosPrueba", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<ErrorMessage<List<Usuario>>> getUserPrueba(@RequestParam Long id) {
+		Optional<Usuario> us = userService.findByIdUsuario(id);
+		us.ifPresent(usuario -> {
+			List<Role> roles = (List<Role>) usuario.getRoles();
+			if (!roles.isEmpty()) {
+				Role primerRol = roles.get(0);
+				if (primerRol.getName().equals("ROLE_ADMIN")) {
+					listadoUser = userDao.obtenerUsuariosPorPais(usuario.getCiudad().getPais().getId());
+				} else if (primerRol.getName().equals("ROLE_LATAM")) {
+					listadoUser = userService.getUsuarios();
+				} else {
+					listadoUser = userDao.obtenerUsuariosPorCiudad(usuario.getCiudad().getId());
+				}
+			}
+		});
 
+		ErrorMessage<List<Usuario>> error = listadoUser.isEmpty()
+				? new ErrorMessage<>(1, "No se ha encontrado información", null)
+				: new ErrorMessage<>(0, "Lista de Usuarios cantidad-->" +listadoUser.size(), listadoUser);
+		return new ResponseEntity<>(error, HttpStatus.OK);
+	}
 
+	
 }
