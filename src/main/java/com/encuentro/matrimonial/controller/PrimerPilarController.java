@@ -1,5 +1,6 @@
 package com.encuentro.matrimonial.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
 import com.encuentro.matrimonial.modelo.PrimerPilar;
+import com.encuentro.matrimonial.modelo.Role;
+import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.IPrimerPilarRepository;
 import com.encuentro.matrimonial.service.IPrimerPilarService;
+import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
 
-import lombok.extern.log4j.Log4j2;
 
 @RestController
 @RequestMapping(ResourceMapping.PRIMER_PILAR)
