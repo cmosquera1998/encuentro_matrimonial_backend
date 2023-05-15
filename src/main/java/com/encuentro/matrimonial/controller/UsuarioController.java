@@ -2,6 +2,7 @@ package com.encuentro.matrimonial.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,6 @@ import com.encuentro.matrimonial.util.ErrorMessage2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 @RestController
 @RequestMapping(ResourceMapping.USER)
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST,
@@ -49,7 +49,6 @@ public class UsuarioController {
 	private IUserRepository userDao;
 	
 	ObjectMapper mapper = new ObjectMapper();
-
 	
 	private List<Usuario> listadoUser = new ArrayList<Usuario>();
 
@@ -81,26 +80,30 @@ public class UsuarioController {
 		return new ResponseEntity<>(error, HttpStatus.OK);
 	}
 	
-	    //servicio que trae el listado de usuarios por pais 
-		@RequestMapping(value = "/getUsuariosPais", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<Usuario>>> getUserPais(@RequestParam Long idPais) {
-			List<Usuario> listado = userDao.obtenerUsuariosPorPais(idPais);
-			ErrorMessage<List<Usuario>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Usuarios", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
-		
-		//servicio que trae el listado de usuarios por ciudad 
-		@RequestMapping(value = "/getUsuariosCiudad", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<Usuario>>> getUserCiudad(@RequestParam Long idCiudad) {
-			List<Usuario> listado = userDao.obtenerUsuariosPorCiudad(idCiudad);
-			ErrorMessage<List<Usuario>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Usuarios", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
-	
+	// servicio que trae el listado de usuarios
+	@RequestMapping(value = "/getUsuariosPrueba", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<ErrorMessage<List<Usuario>>> getUserPrueba(@RequestParam Long id) {
+		Optional<Usuario> us = userService.findByIdUsuario(id);
+		us.ifPresent(usuario -> {
+			List<Role> roles = (List<Role>) usuario.getRoles();
+			if (!roles.isEmpty()) {
+				Role primerRol = roles.get(0);
+				if (primerRol.getName().equals("ROLE_ADMIN")) {
+					listadoUser = userDao.obtenerUsuariosPorPais(usuario.getCiudad().getPais().getId());
+				} else if (primerRol.getName().equals("ROLE_LATAM")) {
+					listadoUser = userService.getUsuarios();
+				} else {
+					listadoUser = userDao.obtenerUsuariosPorCiudad(usuario.getCiudad().getId());
+				}
+			}
+		});
+
+		ErrorMessage<List<Usuario>> error = listadoUser.isEmpty()
+				? new ErrorMessage<>(1, "No se ha encontrado información", null)
+				: new ErrorMessage<>(0, "Lista de Usuarios cantidad-->" +listadoUser.size(), listadoUser);
+		return new ResponseEntity<>(error, HttpStatus.OK);
+	}
+
 	// servicio para crear un usuario
 	@RequestMapping(value = "/createUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage2> createUser(@Valid @RequestBody Usuario user) throws JsonProcessingException {
@@ -129,7 +132,7 @@ public class UsuarioController {
 		Optional<Usuario> us = userService.findByIdUsuario(user.getId());
 		if (!us.isPresent()) {
 			return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
-		}
+		}		
 		if (!us.get().getPassword().equals(user.getPassword())) {
 		    user.setPassword(passwordEncoder.encode(user.getPassword()));
 		}
@@ -163,30 +166,6 @@ public class UsuarioController {
 			userService.deleteUsuario(id);
 			return new ResponseEntity(new ErrorMessage2(0, "Usuario eliminado con exito!"), HttpStatus.OK);
 		}
- 
-	// servicio que trae el listado de usuarios
-	@RequestMapping(value = "/getUsuariosPrueba", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<Usuario>>> getUserPrueba(@RequestParam Long id) {
-		Optional<Usuario> us = userService.findByIdUsuario(id);
-		us.ifPresent(usuario -> {
-			List<Role> roles = (List<Role>) usuario.getRoles();
-			if (!roles.isEmpty()) {
-				Role primerRol = roles.get(0);
-				if (primerRol.getName().equals("ROLE_ADMIN")) {
-					listadoUser = userDao.obtenerUsuariosPorPais(usuario.getCiudad().getPais().getId());
-				} else if (primerRol.getName().equals("ROLE_LATAM")) {
-					listadoUser = userService.getUsuarios();
-				} else {
-					listadoUser = userDao.obtenerUsuariosPorCiudad(usuario.getCiudad().getId());
-				}
-			}
-		});
 
-		ErrorMessage<List<Usuario>> error = listadoUser.isEmpty()
-				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de Usuarios cantidad-->" +listadoUser.size(), listadoUser);
-		return new ResponseEntity<>(error, HttpStatus.OK);
-	}
 
-	
 }

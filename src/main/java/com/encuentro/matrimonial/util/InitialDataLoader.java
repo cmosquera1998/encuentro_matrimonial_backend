@@ -144,7 +144,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			user.setLastname("Administrador");
 			user.setUsername("Cmosquera");
 			user.setPassword(passwordEncoder.encode("1007064254"));
-			user.setDocument("0000");
+			user.setDocument("1007064254");
 			user.setEmail("cmosquerara@gmail.com");
 			user.setTelefono("+57 3213293921");
 			user.setCiudad(ciudadBogota);
