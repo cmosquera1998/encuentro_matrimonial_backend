@@ -19,7 +19,10 @@ public interface ICuartoPilarRepository extends CrudRepository<CuartoPilar, Long
 	@Query(value = "SELECT c FROM cuarto_pilar c WHERE c.ciudad.id = :idCiudad")
 	List<CuartoPilar> obtenerPilarPorCiudad(Long idCiudad);
 	
-	//@Query(value = "SELECT c FROM cuarto_pilar c WHERE c.ciudad.zona.id = :idZona")
-	//List<CuartoPilar> obtenerPilarPorZona(Long idZona);
+	@Query(value = "SELECT c FROM cuarto_pilar c WHERE c.ciudad.region.id = :idRegion")
+	List<CuartoPilar> obtenerPilarPorRegionPais(Long idRegion);
+
+	@Query(value = "SELECT c FROM cuarto_pilar c WHERE c.ciudad.pais.zona.id = :idZona")
+	List<CuartoPilar> obtenerPilarPorZona(Long idZona);
 
 }

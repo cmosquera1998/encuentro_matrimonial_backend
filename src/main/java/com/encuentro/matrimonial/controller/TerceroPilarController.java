@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
+import com.encuentro.matrimonial.modelo.GeneralResponseTotal;
 import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.TercerPilar;
 import com.encuentro.matrimonial.modelo.Usuario;
@@ -25,6 +26,7 @@ import com.encuentro.matrimonial.service.ITercerPilarService;
 import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
+import com.encuentro.matrimonial.util.GeneralResponse;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -43,6 +45,9 @@ public class TerceroPilarController {
 
 	@Autowired
 	private IUserService userService;
+	
+	@Autowired
+	private MessageSourceAccessor message;
 
 	// servicio que trae el una estructura
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -62,55 +67,63 @@ public class TerceroPilarController {
 
 	// servicio que trae el listado de estructuras
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<TercerPilar>>> getAll(@RequestParam Long id) {
+	public ResponseEntity<GeneralResponse<?>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			if (us.isPresent()) {
-				Usuario usuario = us.get();
-				List<Role> roles = (List<Role>) usuario.getRoles();
-				List<TercerPilar> listadoPilar = new ArrayList<>();
-
-				if (!roles.isEmpty()) {
-					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_NACIONAL")) {
-						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
-					} else if (primerRol.getName().equals("ROLE_LATAM")) {
-						listadoPilar = pilarService.getAll();
-					} else {
-						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
-					}
-				}
-
-				ErrorMessage<List<TercerPilar>> lista = listadoPilar.isEmpty()
-						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares", listadoPilar);
-				return ResponseEntity.ok(lista);
-			} else {
-				ErrorMessage<List<TercerPilar>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND,
-						null);
+			if (!us.isPresent()) {
+				GeneralResponse<List<TercerPilar>> error = new GeneralResponse<>(Mensaje.CODE_NOT_FOUND,
+						Mensaje.NOT_FOUND, null, null);
 				return ResponseEntity.ok(error);
 			}
+
+			Usuario usuario = us.get();
+			List<Role> roles = (List<Role>) usuario.getRoles();
+			List<TercerPilar> listadoPilar = new ArrayList<>();
+			List<GeneralResponseTotal> Listotal = new ArrayList<>();
+
+			for (Role role : roles) {
+				if (role.getName().equals("ROLE_DIOSESANO")) {
+					listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
+				} else if (role.getName().equals("ROLE_REGIONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorRegionPais(usuario.getCiudad().getRegion().getId());
+				} else if (role.getName().equals("ROLE_NACIONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
+				} else if (role.getName().equals("ROLE_ZONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorZona(usuario.getCiudad().getPais().getZona().getId());
+				} else if (role.getName().equals("ROLE_LATAM")) {
+					listadoPilar = pilarService.getAll();
+				}
+			}
+
+			if (listadoPilar.isEmpty()) {
+				return ResponseEntity.ok(new GeneralResponse<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null, null));
+			}
+
+			int numR = 0, numDES = 0, numDC = 0, numDEX = 0, numDEC = 0;
+			for (TercerPilar pilar : listadoPilar) {
+				numR += pilar.getNumRegiones();
+				numDES += pilar.getNumDiocesisEstablecidas();
+				numDC += pilar.getNumDiocesisContacto();
+				numDEX += pilar.getNumDiocesisExpansion();
+				numDEC += pilar.getNumDiocesisEclisiastica();
+			}
+			Listotal.add(new GeneralResponseTotal(message.getMessage("tercerPilar.numRegiones"), numR));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("tercerPilar.numDiocesisEstablecidas"), numDES));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("tercerPilar.numDiocesisContacto"), numDC));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("tercerPilar.numDiocesisExpansion"), numDEX));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("tercerPilar.numDiocesisEclisiastica"), numDEC));
+
+			return ResponseEntity
+					.ok(new GeneralResponse<>(Mensaje.CODE_OK, "Lista de pilares", listadoPilar, Listotal));
+
 		} catch (Exception e) {
 			log.error("Error: " + e.getMessage());
-			ErrorMessage<List<TercerPilar>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(),
-					null);
+			GeneralResponse<List<TercerPilar>> body = new GeneralResponse<>(Mensaje.CODE_INTERNAL_SERVER,
+					e.getMessage(), null, null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
 
-	// servicio que trae el listado de estructuras por zona
-	/*
-	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
-	 * "Accept=application/json")
-	 * public ResponseEntity<ErrorMessage<List<TercerPilar>>>
-	 * getAllZona(@RequestParam Long idZona) {
-	 * List<TercerPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
-	 * ErrorMessage<List<TercerPilar>> error = listado.isEmpty()
-	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
-	 * : new ErrorMessage<>(0, "Lista de pilares por zona", listado);
-	 * return new ResponseEntity<>(error, HttpStatus.OK);
-	 * }
-	 */
 
 	// servicio para crear una estructura
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

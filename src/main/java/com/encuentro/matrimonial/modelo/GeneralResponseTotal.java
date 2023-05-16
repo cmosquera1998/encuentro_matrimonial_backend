@@ -1,4 +1,4 @@
-package com.encuentro.matrimonial.dto;
+package com.encuentro.matrimonial.modelo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TotalPrimerPilarDto {
+public class GeneralResponseTotal {
 	private String key;
 	private int value;
 }

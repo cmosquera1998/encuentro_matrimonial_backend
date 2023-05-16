@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
 import com.encuentro.matrimonial.modelo.CuartoPilar;
+import com.encuentro.matrimonial.modelo.GeneralResponseTotal;
 import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.ICuartoPilarRepository;
@@ -25,6 +26,7 @@ import com.encuentro.matrimonial.service.ICuartoPilarService;
 import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
+import com.encuentro.matrimonial.util.GeneralResponse;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -43,6 +45,10 @@ public class CuartoPilarController {
 
 	@Autowired
 	private IUserService userService;
+	
+	@Autowired
+	private MessageSourceAccessor message;
+
 
 	// servicio que trae el post encuentro
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -62,54 +68,69 @@ public class CuartoPilarController {
 
 	// servicio que trae el listado de post encuentro
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAll(@RequestParam Long id) {
+	public ResponseEntity<GeneralResponse<?>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			if (us.isPresent()) {
-				Usuario usuario = us.get();
-				List<Role> roles = (List<Role>) usuario.getRoles();
-				List<CuartoPilar> listadoPilar = new ArrayList<CuartoPilar>();
-				if (!roles.isEmpty()) {
-					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_NACIONAL")) {
-						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
-					} else if (primerRol.getName().equals("ROLE_LATAM")) {
-						listadoPilar = pilarService.getAll();
-					} else {
-						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
-					}
-				}
-
-				ErrorMessage<List<CuartoPilar>> lista = listadoPilar.isEmpty()
-						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listadoPilar);
-				return ResponseEntity.ok().body(lista);
-			} else {
-				ErrorMessage<List<CuartoPilar>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND,
-						null);
+			if (!us.isPresent()) {
+				GeneralResponse<List<CuartoPilar>> error = new GeneralResponse<>(Mensaje.CODE_NOT_FOUND,
+						Mensaje.NOT_FOUND, null, null);
 				return ResponseEntity.ok(error);
 			}
+
+			Usuario usuario = us.get();
+			List<Role> roles = (List<Role>) usuario.getRoles();
+			List<CuartoPilar> listadoPilar = new ArrayList<>();
+			List<GeneralResponseTotal> Listotal = new ArrayList<>();
+
+			for (Role role : roles) {
+				if (role.getName().equals("ROLE_DIOSESANO")) {
+					listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
+				} else if (role.getName().equals("ROLE_REGIONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorRegionPais(usuario.getCiudad().getRegion().getId());
+				} else if (role.getName().equals("ROLE_NACIONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
+				} else if (role.getName().equals("ROLE_ZONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorZona(usuario.getCiudad().getPais().getZona().getId());
+				} else if (role.getName().equals("ROLE_LATAM")) {
+					listadoPilar = pilarService.getAll();
+				}
+			}
+
+			if (listadoPilar.isEmpty()) {
+				return ResponseEntity.ok(new GeneralResponse<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null, null));
+			}
+
+			int numSPA = 0, numFDS = 0, numMV = 0, numCA = 0, numSEC = 0, numMC = 0, numSAC = 0, numRC = 0;
+			for (CuartoPilar pilar : listadoPilar) {
+				numSPA += pilar.getNumServidoresPostActivos();
+				numFDS += pilar.getNumFdsPostPeriodo();
+				numMV += pilar.getNumMatrimonioVivieron();
+				numCA += pilar.getNumComunidadApoyo();
+				numSEC += pilar.getNumServiciosComunidad();
+				numMC += pilar.getNumMatrimoiosComunidad();
+				numSAC += pilar.getNumSacerdotesComunidad();
+				numRC += pilar.getNumReligiososComunidad();
+			}
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numServidoresPostActivos"), numSPA));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numFdsPostPeriodo"), numFDS));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numMatrimonioVivieron"), numMV));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numComunidadApoyo"), numCA));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numServiciosComunidad"), numSEC));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numMatrimoiosComunidad"), numMC));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numSacerdotesComunidad"), numSAC));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("cuartoPilar.numReligiososComunidad"), numRC));
+
+			return ResponseEntity
+					.ok(new GeneralResponse<>(Mensaje.CODE_OK, "Lista de pilares", listadoPilar, Listotal));
+
 		} catch (Exception e) {
 			log.error("Error: " + e.getMessage());
-			ErrorMessage<List<CuartoPilar>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(),
-					null);
+			GeneralResponse<List<CuartoPilar>> body = new GeneralResponse<>(Mensaje.CODE_INTERNAL_SERVER,
+					e.getMessage(), null, null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
 
-	// servicio que trae el listado de de post encuentro por zona
-	/*
-	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
-	 * "Accept=application/json")
-	 * public ResponseEntity<ErrorMessage<List<CuartoPilar>>>
-	 * getAllZona(@RequestParam Long idZona) {
-	 * List<CuartoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
-	 * ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
-	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
-	 * : new ErrorMessage<>(0, "Lista de pilares por zona", listado);
-	 * return new ResponseEntity<>(error, HttpStatus.OK);
-	 * }
-	 */
 
 	// servicio para crear un post encuentro
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

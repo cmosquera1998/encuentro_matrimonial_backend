@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
 import com.encuentro.matrimonial.modelo.FormacionMatrimonio;
+import com.encuentro.matrimonial.modelo.GeneralResponseTotal;
 import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.Usuario;
 import com.encuentro.matrimonial.repository.IFormacionMatrimonioRepository;
@@ -26,6 +28,7 @@ import com.encuentro.matrimonial.service.IFormacionMatrimonioService;
 import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
+import com.encuentro.matrimonial.util.GeneralResponse;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -44,6 +47,9 @@ public class FormacionMatrimonioController {
 
 	@Autowired
 	private IUserService userService;
+	
+	@Autowired
+	private MessageSourceAccessor message;
 
 	// servicio que trae una formacion de matrimonio
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -64,54 +70,79 @@ public class FormacionMatrimonioController {
 
 	// servicio que trae el listado de formacion de matrimonios
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<FormacionMatrimonio>>> getAll(@RequestParam Long id) {
+	public ResponseEntity<GeneralResponse<?>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			if (us.isPresent()) {
-				Usuario usuario = us.get();
-				List<Role> roles = (List<Role>) usuario.getRoles();
-				List<FormacionMatrimonio> listadoFormacion = new ArrayList<FormacionMatrimonio>();
-				if (!roles.isEmpty()) {
-					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_NACIONAL")) {
-						listadoFormacion = formacionDTO.obtenerFormacionPorPais(usuario.getCiudad().getPais().getId());
-					} else if (primerRol.getName().equals("ROLE_LATAM")) {
-						listadoFormacion = formacionService.getAll();
-					} else {
-						listadoFormacion = formacionDTO.obtenerFormacionPorCiudad(usuario.getCiudad().getId());
-					}
-				}
-				ErrorMessage<List<FormacionMatrimonio>> lista = listadoFormacion.isEmpty()
-						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de Formacion de matrimonios", listadoFormacion);
-				return ResponseEntity.ok().body(lista);
-			} else {
-				ErrorMessage<List<FormacionMatrimonio>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND,
-						Mensaje.NOT_FOUND, null);
+			if (!us.isPresent()) {
+				GeneralResponse<List<FormacionMatrimonio>> error = new GeneralResponse<>(Mensaje.CODE_NOT_FOUND,
+						Mensaje.NOT_FOUND, null, null);
 				return ResponseEntity.ok(error);
 			}
+
+			Usuario usuario = us.get();
+			List<Role> roles = (List<Role>) usuario.getRoles();
+			List<FormacionMatrimonio> listadoFormacion = new ArrayList<>();
+			List<GeneralResponseTotal> Listotal = new ArrayList<>();
+
+			for (Role role : roles) {
+				if (role.getName().equals("ROLE_DIOSESANO")) {
+					listadoFormacion = formacionDTO.obtenerFormacionPorCiudad(usuario.getCiudad().getId());
+				} else if (role.getName().equals("ROLE_REGIONAL")) {
+					listadoFormacion = formacionDTO.obtenerFormacionPorRegionPais(usuario.getCiudad().getRegion().getId());
+				} else if (role.getName().equals("ROLE_NACIONAL")) {
+					listadoFormacion = formacionDTO.obtenerFormacionPorPais(usuario.getCiudad().getPais().getId());
+				} else if (role.getName().equals("ROLE_ZONAL")) {
+					listadoFormacion = formacionDTO.obtenerFormacionPorZona(usuario.getCiudad().getPais().getZona().getId());
+				} else if (role.getName().equals("ROLE_LATAM")) {
+					listadoFormacion = formacionService.getAll();
+				}
+			}
+
+			if (listadoFormacion.isEmpty()) {
+				return ResponseEntity.ok(new GeneralResponse<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null, null));
+			}
+
+			int JD = 0, RE = 0, LA = 0, GT = 0, S = 0, DNS = 0, DNV = 0, PC = 0, DP = 0, SP = 0, FA = 0, PN = 0, TN = 0;
+			for (FormacionMatrimonio formacion : listadoFormacion) {
+				JD += formacion.getJornadaDialogo();
+				RE += formacion.getRetornoEspiritual();
+				LA += formacion.getLenguajeAmor();
+				GT += formacion.getGuiaDeRelacion();
+				S += formacion.getSacramento();
+				DNS += formacion.getDiosEnSacramento();
+				DNV += formacion.getDiosEnVida();
+				PC += formacion.getPatronesComportamiento();
+				DP += formacion.getDialogoProfundo();
+				SP += formacion.getServidoresPostEncuentro();
+				FA += formacion.getFormacionAcompanantes();
+				PN += formacion.getPadreNuestro();
+				TN += formacion.getTransmisionNacional();
+			}
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.jornadaDialogo"), JD));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.retornoEspiritual"), RE));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.lenguajeAmor"), LA));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.guiaDeRelacion"), GT));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.sacramento"), S));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.diosEnSacramento"), DNS));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.diosEnVida"), DNV));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.patronesComportamiento"), PC));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.dialogoProfundo"), DP));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.servidoresPostEncuentro"), SP));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.formacionAcompanantes"), FA));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.padreNuestro"), PN));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("formacion.transmisionNacional"), TN));
+
+			return ResponseEntity
+					.ok(new GeneralResponse<>(Mensaje.CODE_OK, "Lista de Formacion de matrimonios", listadoFormacion, Listotal));
+
 		} catch (Exception e) {
 			log.error("Error: " + e.getMessage());
-			ErrorMessage<List<FormacionMatrimonio>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER,
-					e.getMessage(), null);
+			GeneralResponse<List<FormacionMatrimonio>> body = new GeneralResponse<>(Mensaje.CODE_INTERNAL_SERVER,
+					e.getMessage(), null, null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
 
-	// servicio que trae el listado de fines de semana por zona
-	/*
-	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
-	 * "Accept=application/json")
-	 * public ResponseEntity<ErrorMessage<List<FormacionMatrimonio>>>
-	 * getAllZona(@RequestParam Long idZona) {
-	 * List<FormacionMatrimonio> listado = formacionDTO.obtenerPilarPorZona(idZona);
-	 * ErrorMessage<List<FormacionMatrimonio>> error = listado.isEmpty()
-	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
-	 * : new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por zona",
-	 * listado);
-	 * return new ResponseEntity<>(error, HttpStatus.OK);
-	 * }
-	 */
 
 	// servicio para crear una formacion de matrimonio
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
-import com.encuentro.matrimonial.dto.TotalPrimerPilarDto;
+import com.encuentro.matrimonial.modelo.GeneralResponseTotal;
 import com.encuentro.matrimonial.modelo.PrimerPilar;
 import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.Usuario;
@@ -47,6 +49,10 @@ public class PrimerPilarController {
 
 	@Autowired
 	IPrimerPilarRepository pilarDTO;
+	
+	@Autowired
+	private MessageSourceAccessor message;
+
 
 	// servicio que trae un fin de semana
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -65,54 +71,54 @@ public class PrimerPilarController {
 	}
 
 	// servicio que trae el listado de fines de semana dependiendo el rol puede trar
-	// por la ciudad , todos en general o por pais
+	// por la ciudad,por region,por pais,por zona  o todos en general si es latam
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<GeneralResponse<List<PrimerPilar>>> getAll(@RequestParam Long id) {
+	public ResponseEntity<GeneralResponse<?>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
-			if (us.isPresent()) {
-				Usuario usuario = us.get();
-				List<Role> roles = (List<Role>) usuario.getRoles();
-				List<PrimerPilar> listadoPilar = new ArrayList<>();
-
-				if (!roles.isEmpty()) {
-					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_NACIONAL")) {
-						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
-					} else if (primerRol.getName().equals("ROLE_LATAM")) {
-						listadoPilar = pilarService.getAll();
-					} else {
-						listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
-					}
-				}
-
-				if (listadoPilar.isEmpty()) {
-					return new ResponseEntity(
-							new GeneralResponse(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null, null), HttpStatus.OK);
-				}
-
-				List<TotalPrimerPilarDto> Listotal = new ArrayList<TotalPrimerPilarDto>();
-
-				int numMV = 0, numSc = 0, numRe = 0;
-
-				for (PrimerPilar lista : listadoPilar) {
-					numMV += lista.getNumMatrinoniosVivieron();
-					numSc += lista.getNumSacerdotesVivieron();
-					numRe += lista.getNumReligiososVivieron();
-				}
-				Listotal.add(new TotalPrimerPilarDto("N° de Matrimonios que lo vivieron", numMV));
-				Listotal.add(new TotalPrimerPilarDto("N° de Sacerdotes que lo vivieron", numSc));
-				Listotal.add(new TotalPrimerPilarDto("N° de Religiosas que lo vivieron", numRe));
-
-				return new ResponseEntity(
-						new GeneralResponse(Mensaje.CODE_OK, "Lista de pilares", listadoPilar, Listotal),
-						HttpStatus.OK);
-
-			} else {
+			if (!us.isPresent()) {
 				GeneralResponse<List<PrimerPilar>> error = new GeneralResponse<>(Mensaje.CODE_NOT_FOUND,
 						Mensaje.NOT_FOUND, null, null);
 				return ResponseEntity.ok(error);
 			}
+
+			Usuario usuario = us.get();
+			List<Role> roles = (List<Role>) usuario.getRoles();
+			List<PrimerPilar> listadoPilar = new ArrayList<>();
+			List<GeneralResponseTotal> Listotal = new ArrayList<>();
+
+			for (Role role : roles) {
+				if (role.getName().equals("ROLE_DIOSESANO")) {
+					listadoPilar = pilarDTO.obtenerPilarPorCiudad(usuario.getCiudad().getId());
+				} else if (role.getName().equals("ROLE_REGIONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorRegionPais(usuario.getCiudad().getRegion().getId());
+				} else if (role.getName().equals("ROLE_NACIONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
+				} else if (role.getName().equals("ROLE_ZONAL")) {
+					listadoPilar = pilarDTO.obtenerPilarPorZona(usuario.getCiudad().getPais().getZona().getId());
+				} else if (role.getName().equals("ROLE_LATAM")) {
+					listadoPilar = pilarService.getAll();
+				}
+			}
+
+			if (listadoPilar.isEmpty()) {
+				return ResponseEntity.ok(new GeneralResponse<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null, null));
+			}
+
+			int numMV = 0, numSc = 0, numRe = 0;
+			for (PrimerPilar pilar : listadoPilar) {
+				numMV += pilar.getNumMatrinoniosVivieron();
+				numSc += pilar.getNumSacerdotesVivieron();
+				numRe += pilar.getNumReligiososVivieron();
+			}
+			Listotal.add(new GeneralResponseTotal(message.getMessage("primerPilar.numFDS"), listadoPilar.size()));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("primerPilar.numMatrinoniosVivieron"), numMV));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("primerPilar.numSacerdotesVivieron"), numSc));
+			Listotal.add(new GeneralResponseTotal(message.getMessage("primerPilar.numReligiososVivieron"), numRe));
+
+			return ResponseEntity
+					.ok(new GeneralResponse<>(Mensaje.CODE_OK, "Lista de pilares", listadoPilar, Listotal));
+
 		} catch (Exception e) {
 			log.error("Error: " + e.getMessage());
 			GeneralResponse<List<PrimerPilar>> body = new GeneralResponse<>(Mensaje.CODE_INTERNAL_SERVER,
