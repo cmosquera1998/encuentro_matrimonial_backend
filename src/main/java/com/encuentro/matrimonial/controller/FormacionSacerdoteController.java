@@ -38,20 +38,20 @@ public class FormacionSacerdoteController {
 
 	@Autowired
 	private IFormacionSacerdoteService formacionService;
-	
+
 	@Autowired
 	IFormacionSacerdoteRepository formacionDTO;
-	
+
 	@Autowired
 	private IUserService userService;
-	
-	//servicio que trae una formacion  de sacerdote
+
+	// servicio que trae una formacion de sacerdote
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
 		log.debug("Id:-" + id);
 		try {
 			FormacionSacerdote formacion = formacionService.findByFormacionSacerdote(id);
-			ErrorMessage<?> error = formacion == null 
+			ErrorMessage<?> error = formacion == null
 					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
 					: new ErrorMessage<>(Mensaje.CODE_OK, "Formacion de sacerdote", formacion);
 			return ResponseEntity.ok().body(error);
@@ -62,7 +62,7 @@ public class FormacionSacerdoteController {
 		}
 	}
 
-	//servicio que trae el listado de formacion  de sacerdotes
+	// servicio que trae el listado de formacion de sacerdotes
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAll(@RequestParam Long id) {
 		try {
@@ -73,7 +73,7 @@ public class FormacionSacerdoteController {
 				List<FormacionSacerdote> listadoFormacion = new ArrayList<FormacionSacerdote>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoFormacion = formacionDTO.obtenerFormacionPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {
 						listadoFormacion = formacionService.getAll();
@@ -97,18 +97,23 @@ public class FormacionSacerdoteController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-		
-		// servicio que trae el listado de formacion de sacerdotes por zona
-		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>> getAllZona(@RequestParam Long idZona) {
-			List<FormacionSacerdote> listado = formacionDTO.obtenerPilarPorZona(idZona);
-			ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por zona", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 
-	//servicio para crear una formacion  de sacerdote
+	// servicio que trae el listado de formacion de sacerdotes por zona
+	/*
+	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
+	 * "Accept=application/json")
+	 * public ResponseEntity<ErrorMessage<List<FormacionSacerdote>>>
+	 * getAllZona(@RequestParam Long idZona) {
+	 * List<FormacionSacerdote> listado = formacionDTO.obtenerPilarPorZona(idZona);
+	 * ErrorMessage<List<FormacionSacerdote>> error = listado.isEmpty()
+	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
+	 * : new ErrorMessage<>(0, "Lista de Formacion de sacerdotes por zona",
+	 * listado);
+	 * return new ResponseEntity<>(error, HttpStatus.OK);
+	 * }
+	 */
+
+	// servicio para crear una formacion de sacerdote
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<?> create(@RequestBody FormacionSacerdote formacion) {
 		log.debug("DataBody:-" + formacion);
@@ -126,12 +131,13 @@ public class FormacionSacerdoteController {
 		return ResponseEntity.badRequest().body(new ErrorMessage2(1, Mensaje.BAD_REQUEST));
 	}
 
-	//servicio para actualizar una formacion  de sacerdote
+	// servicio para actualizar una formacion de sacerdote
 	@RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<?> update(@RequestBody FormacionSacerdote formacion) {
 		log.info("DataBody:-" + formacion);
 		try {
-			Optional<FormacionSacerdote> pl = Optional.ofNullable(formacionService.findByFormacionSacerdote(formacion.getId()));
+			Optional<FormacionSacerdote> pl = Optional
+					.ofNullable(formacionService.findByFormacionSacerdote(formacion.getId()));
 			if (!pl.isPresent()) {
 				return ((BodyBuilder) ResponseEntity.notFound())
 						.body(new ErrorMessage2(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND));
@@ -147,7 +153,7 @@ public class FormacionSacerdoteController {
 		}
 	}
 
-	//servicio para eliminar una formacion  de sacerdote
+	// servicio para eliminar una formacion de sacerdote
 	@RequestMapping(value = "/delete", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<?> delete(@RequestParam Long id) {
 		log.debug("Id:-" + id);

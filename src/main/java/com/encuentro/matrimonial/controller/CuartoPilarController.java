@@ -37,13 +37,13 @@ public class CuartoPilarController {
 
 	@Autowired
 	private ICuartoPilarService pilarService;
-	
+
 	@Autowired
 	ICuartoPilarRepository pilarDTO;
-	
+
 	@Autowired
 	private IUserService userService;
-	
+
 	// servicio que trae el post encuentro
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
@@ -71,7 +71,7 @@ public class CuartoPilarController {
 				List<CuartoPilar> listadoPilar = new ArrayList<CuartoPilar>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {
 						listadoPilar = pilarService.getAll();
@@ -97,18 +97,20 @@ public class CuartoPilarController {
 		}
 	}
 
-		
-		// servicio que trae el listado de de post encuentro por zona
-		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<CuartoPilar>>> getAllZona(@RequestParam Long idZona) {
-			List<CuartoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
-			ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares por zona", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
+	// servicio que trae el listado de de post encuentro por zona
+	/*
+	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
+	 * "Accept=application/json")
+	 * public ResponseEntity<ErrorMessage<List<CuartoPilar>>>
+	 * getAllZona(@RequestParam Long idZona) {
+	 * List<CuartoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
+	 * ErrorMessage<List<CuartoPilar>> error = listado.isEmpty()
+	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
+	 * : new ErrorMessage<>(0, "Lista de pilares por zona", listado);
+	 * return new ResponseEntity<>(error, HttpStatus.OK);
+	 * }
+	 */
 
-	
 	// servicio para crear un post encuentro
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")
 	public ResponseEntity<?> create(@RequestBody CuartoPilar pilar) {

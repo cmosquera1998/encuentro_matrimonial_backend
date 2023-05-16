@@ -25,6 +25,9 @@ public class Role {
 	private Long id;
 
 	private String name;
+	
+	private String detalle;
+	
 	@ManyToMany(mappedBy = "roles")
 	@JsonIgnore
 	private Collection<Usuario> users;

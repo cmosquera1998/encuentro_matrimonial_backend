@@ -1,15 +1,18 @@
 package com.encuentro.matrimonial.modelo;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Getter
@@ -18,8 +21,8 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ciudad")
-public class Ciudad {
+@Table(name = "region")
+public class Region {
 
 	@Id
 	@Column
@@ -27,13 +30,12 @@ public class Ciudad {
 
 	@Column
 	private String name;
-	
-	@ManyToOne
+
+	/*@ManyToOne
 	@JoinColumn(name = "pais_id")
-	private Pais pais;
+	private Pais pais;*/
 
-	@ManyToOne
-	@JoinColumn(name = "region_id")
-	private Region region;
-
+	/*@OneToMany
+	@JoinColumn(name = "ciudad_id")
+	private List<Ciudad> ciudad;*/
 }

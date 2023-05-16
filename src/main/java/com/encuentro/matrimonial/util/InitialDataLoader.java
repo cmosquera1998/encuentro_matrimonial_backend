@@ -29,6 +29,9 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	private IZonaRepository zonaRepository;
 	
 	@Autowired
+	private IRegionRepository regionRepository;
+	
+	@Autowired
 	private PaisRepository paisRepository;
 	
 	@Autowired
@@ -62,11 +65,11 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		List<Privilege> diosesanoPrivileges = Arrays.asList(readPrivilege, writePrivilege);
 
 	
-		createRoleIfNotFound(1L,"ROLE_NACIONAL", adminPrivileges);
-		createRoleIfNotFound(2L,"ROLE_DIOSESANO", diosesanoPrivileges);
-		createRoleIfNotFound(3L,"ROLE_REGIONAL", Arrays.asList(writePrivilege));
-		createRoleIfNotFound(4L,"ROLE_ZONAL", Arrays.asList(readPrivilege));
-		createRoleIfNotFound(5L,"ROLE_LATAM", adminPrivileges);
+		createRoleIfNotFound(1L,"ROLE_DIOSESANO","ROL DIOSESANO", diosesanoPrivileges);
+		createRoleIfNotFound(2L,"ROLE_REGIONAL","ROL REGIONAL", Arrays.asList(writePrivilege));
+		createRoleIfNotFound(3L,"ROLE_NACIONAL","ROL NACIONAL", adminPrivileges);
+		createRoleIfNotFound(4L,"ROLE_ZONAL","ROL ZONAL", Arrays.asList(readPrivilege));
+		createRoleIfNotFound(5L,"ROLE_LATAM","ROL LATAM", adminPrivileges);
 
 		Role nacionalRole = roleRepository.findByName("ROLE_NACIONAL");
 		Role diosesanoRole = roleRepository.findByName("ROLE_DIOSESANO");
@@ -82,6 +85,15 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		Zona zonaSur = zonaRepository.findByID(2L);
 		Zona zonaNorte = zonaRepository.findByID(3L);
 		
+		createRegionIfNotFound(1L, "REGION SUR");
+		createRegionIfNotFound(2L, "REGION CENTRO");
+		createRegionIfNotFound(3L, "REGION NORTE");
+
+		Region regionSur = regionRepository.findByID(1L);
+		Region regionCentro = regionRepository.findByID(2L);
+		Region regionNorte = regionRepository.findByID(3L);
+		
+		
 		
 		createPaisIfNotFound(1L, "Colombia", zonaCentro);
 		createPaisIfNotFound(2L, "Peru", zonaCentro);
@@ -95,32 +107,32 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		Pais paisEcuador = paisRepository.findByName("Ecuador");
 		Pais paisVanezuela = paisRepository.findByName("Vanezuela");
 		
-		createCiudadIfNotFound(1L, "ARMENIA", paisColombia,zonaSur);
-		createCiudadIfNotFound(2L, "PEREIRA", paisColombia,zonaSur);
-		createCiudadIfNotFound(3L, "MANIZALES", paisColombia,zonaSur);
-		createCiudadIfNotFound(4L, "MEDELLIN", paisColombia,zonaSur);
-		createCiudadIfNotFound(5L, "CALI", paisColombia,zonaSur);
+		createCiudadIfNotFound(1L, "ARMENIA", paisColombia,regionSur);
+		createCiudadIfNotFound(2L, "PEREIRA", paisColombia,regionSur);
+		createCiudadIfNotFound(3L, "MANIZALES", paisColombia,regionSur);
+		createCiudadIfNotFound(4L, "MEDELLIN", paisColombia,regionSur);
+		createCiudadIfNotFound(5L, "CALI", paisColombia,regionSur);
 		
 		
-		createCiudadIfNotFound(6L, "BOGOTA", paisColombia,zonaCentro);
-		createCiudadIfNotFound(7L, "ZIPAQUIRA", paisColombia,zonaCentro);
-		createCiudadIfNotFound(8L, "BUCARAMANGA", paisColombia,zonaCentro);
-		createCiudadIfNotFound(9L, "IBAGUE", paisColombia,zonaCentro);
-		createCiudadIfNotFound(10L, "NEIVA", paisColombia,zonaCentro);
-		createCiudadIfNotFound(11L, "PITALITO", paisColombia,zonaCentro);
-		createCiudadIfNotFound(12L, "FLORENCIA", paisColombia,zonaCentro);
-		createCiudadIfNotFound(13L, "GRANADA", paisColombia,zonaCentro);
-		createCiudadIfNotFound(14L, "VILLAVICENCIO", paisColombia,zonaCentro);
+		createCiudadIfNotFound(6L, "BOGOTA", paisColombia,regionCentro);
+		createCiudadIfNotFound(7L, "ZIPAQUIRA", paisColombia,regionCentro);
+		createCiudadIfNotFound(8L, "BUCARAMANGA", paisColombia,regionCentro);
+		createCiudadIfNotFound(9L, "IBAGUE", paisColombia,regionCentro);
+		createCiudadIfNotFound(10L, "NEIVA", paisColombia,regionCentro);
+		createCiudadIfNotFound(11L, "PITALITO", paisColombia,regionCentro);
+		createCiudadIfNotFound(12L, "FLORENCIA", paisColombia,regionCentro);
+		createCiudadIfNotFound(13L, "GRANADA", paisColombia,regionCentro);
+		createCiudadIfNotFound(14L, "VILLAVICENCIO", paisColombia,regionCentro);
 																						
 
-		createCiudadIfNotFound(15L, "BARRANQUILLA", paisColombia, zonaNorte);
-		createCiudadIfNotFound(16L, "CARTAGENA", paisColombia, zonaNorte);
-		createCiudadIfNotFound(17L, "SANTA MARTA", paisColombia, zonaNorte);
-		createCiudadIfNotFound(18L, "SAN ANDRES", paisColombia, zonaNorte);
+		createCiudadIfNotFound(15L, "BARRANQUILLA", paisColombia, regionNorte);
+		createCiudadIfNotFound(16L, "CARTAGENA", paisColombia, regionNorte);
+		createCiudadIfNotFound(17L, "SANTA MARTA", paisColombia, regionNorte);
+		createCiudadIfNotFound(18L, "SAN ANDRES", paisColombia, regionNorte);
 
-		createCiudadIfNotFound(19L, "LIMA", paisPeru, zonaNorte);
-		// createCiudadIfNotFound(9L, "Cusco", paisPeru);
-		// createCiudadIfNotFound(10L, "Arequipa", paisPeru);
+		createCiudadIfNotFound(19L, "LIMA", paisPeru, regionNorte);
+		createCiudadIfNotFound(20L, "Cusco", paisPeru,regionNorte);
+		createCiudadIfNotFound(21L, "Arequipa", paisPeru,regionNorte);
 		
 		
 													
@@ -129,11 +141,10 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		Ciudad ciudadMedellin = ciudadRepository.findByName("MEDELLIN");
 		Ciudad ciudadLima = ciudadRepository.findByName("LIMA");
 
-		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
-		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
-	    //createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadMedellin);
-		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadLima);
-		
+		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
+		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
+		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadMedellin);
+
 		
 		if (userRepository.findByUser("Cmosquera") == null) {
 			Usuario user = new Usuario();
@@ -161,6 +172,17 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		alreadySetup = true;
 	}
 	
+	
+	@Transactional
+	private Region createRegionIfNotFound(Long id, String name) {
+		Region region = new Region();
+		region.setId(id);
+		region.setName(name);
+		//region.setPais(pais);
+		regionRepository.save(region);
+		return region;
+	}
+	
 	@Transactional
 	private Pais createPaisIfNotFound(Long id, String name , Zona zona) {
 		Pais pais = new Pais();
@@ -181,12 +203,12 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	}
 	
 	@Transactional
-	private Ciudad createCiudadIfNotFound(Long id, String name , Pais pais, Zona zona) {
+	private Ciudad createCiudadIfNotFound(Long id, String name , Pais pais, Region region) {
 		Ciudad ciudad = new Ciudad();
 		ciudad.setId(id);
 		ciudad.setName(name);
 		ciudad.setPais(pais);
-		ciudad.setZona(zona);
+		ciudad.setRegion(region);
 		ciudadRepository.save(ciudad);
 		return ciudad;
 	}
@@ -203,11 +225,11 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	}
 
 	@Transactional
-	private Role createRoleIfNotFound(Long id,String name, Collection<Privilege> privileges) {
+	private Role createRoleIfNotFound(Long id,String name, String detalle, Collection<Privilege> privileges) {
 
 		Role role = roleRepository.findByName(name);
 		if (role == null) {
-			role = new Role(id, name, null, privileges);
+			role = new Role(id, name, detalle, null, privileges);
 			roleRepository.save(role);
 		}
 		return role;

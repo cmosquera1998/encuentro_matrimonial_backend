@@ -84,7 +84,7 @@ public class UbicacionController {
 				List<Ciudad> listadoCiudades = new ArrayList<Ciudad>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoCiudades = ciudadRepository
 								.obtenerCiudadesPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {

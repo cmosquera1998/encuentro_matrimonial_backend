@@ -32,4 +32,5 @@ public class Pais {
 	@ManyToOne
 	@JoinColumn(name = "zona_id")
 	private Zona zona;
+
 }

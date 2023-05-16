@@ -37,10 +37,10 @@ public class TerceroPilarController {
 
 	@Autowired
 	private ITercerPilarService pilarService;
-	
+
 	@Autowired
 	ITercerPilarRepository pilarDTO;
-	
+
 	@Autowired
 	private IUserService userService;
 
@@ -72,7 +72,7 @@ public class TerceroPilarController {
 
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {
 						listadoPilar = pilarService.getAll();
@@ -99,14 +99,18 @@ public class TerceroPilarController {
 	}
 
 	// servicio que trae el listado de estructuras por zona
-	@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<TercerPilar>>> getAllZona(@RequestParam Long idZona) {
-		List<TercerPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
-		ErrorMessage<List<TercerPilar>> error = listado.isEmpty()
-				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de pilares por zona", listado);
-		return new ResponseEntity<>(error, HttpStatus.OK);
-	}
+	/*
+	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
+	 * "Accept=application/json")
+	 * public ResponseEntity<ErrorMessage<List<TercerPilar>>>
+	 * getAllZona(@RequestParam Long idZona) {
+	 * List<TercerPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
+	 * ErrorMessage<List<TercerPilar>> error = listado.isEmpty()
+	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
+	 * : new ErrorMessage<>(0, "Lista de pilares por zona", listado);
+	 * return new ResponseEntity<>(error, HttpStatus.OK);
+	 * }
+	 */
 
 	// servicio para crear una estructura
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

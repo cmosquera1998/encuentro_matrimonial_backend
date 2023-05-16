@@ -1,7 +1,9 @@
 package com.encuentro.matrimonial.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.encuentro.matrimonial.constants.Mensaje;
 import com.encuentro.matrimonial.constants.ResourceMapping;
+import com.encuentro.matrimonial.dto.TotalPrimerPilarDto;
 import com.encuentro.matrimonial.modelo.PrimerPilar;
 import com.encuentro.matrimonial.modelo.Role;
 import com.encuentro.matrimonial.modelo.Usuario;
@@ -25,6 +28,7 @@ import com.encuentro.matrimonial.service.IPrimerPilarService;
 import com.encuentro.matrimonial.service.IUserService;
 import com.encuentro.matrimonial.util.ErrorMessage;
 import com.encuentro.matrimonial.util.ErrorMessage2;
+import com.encuentro.matrimonial.util.GeneralResponse;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -37,10 +41,10 @@ public class PrimerPilarController {
 
 	@Autowired
 	private IPrimerPilarService pilarService;
-	
+
 	@Autowired
 	private IUserService userService;
-	
+
 	@Autowired
 	IPrimerPilarRepository pilarDTO;
 
@@ -59,10 +63,11 @@ public class PrimerPilarController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-	
-	//servicio que trae el listado de fines de semana dependiendo el rol puede trar por la ciudad  , todos en general  o por pais 	
+
+	// servicio que trae el listado de fines de semana dependiendo el rol puede trar
+	// por la ciudad , todos en general o por pais
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAll(@RequestParam Long id) {
+	public ResponseEntity<GeneralResponse<List<PrimerPilar>>> getAll(@RequestParam Long id) {
 		try {
 			Optional<Usuario> us = userService.findByIdUsuario(id);
 			if (us.isPresent()) {
@@ -72,7 +77,7 @@ public class PrimerPilarController {
 
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {
 						listadoPilar = pilarService.getAll();
@@ -81,43 +86,40 @@ public class PrimerPilarController {
 					}
 				}
 
-				ErrorMessage<List<PrimerPilar>> lista = listadoPilar.isEmpty()
-						? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-						: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares", listadoPilar);
-				return ResponseEntity.ok(lista);
+				if (listadoPilar.isEmpty()) {
+					return new ResponseEntity(
+							new GeneralResponse(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null, null), HttpStatus.OK);
+				}
+
+				List<TotalPrimerPilarDto> Listotal = new ArrayList<TotalPrimerPilarDto>();
+
+				int numMV = 0, numSc = 0, numRe = 0;
+
+				for (PrimerPilar lista : listadoPilar) {
+					numMV += lista.getNumMatrinoniosVivieron();
+					numSc += lista.getNumSacerdotesVivieron();
+					numRe += lista.getNumReligiososVivieron();
+				}
+				Listotal.add(new TotalPrimerPilarDto("N° de Matrimonios que lo vivieron", numMV));
+				Listotal.add(new TotalPrimerPilarDto("N° de Sacerdotes que lo vivieron", numSc));
+				Listotal.add(new TotalPrimerPilarDto("N° de Religiosas que lo vivieron", numRe));
+
+				return new ResponseEntity(
+						new GeneralResponse(Mensaje.CODE_OK, "Lista de pilares", listadoPilar, Listotal),
+						HttpStatus.OK);
+
 			} else {
-				ErrorMessage<List<PrimerPilar>> error = new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND,null);
+				GeneralResponse<List<PrimerPilar>> error = new GeneralResponse<>(Mensaje.CODE_NOT_FOUND,
+						Mensaje.NOT_FOUND, null, null);
 				return ResponseEntity.ok(error);
 			}
 		} catch (Exception e) {
 			log.error("Error: " + e.getMessage());
-			ErrorMessage<List<PrimerPilar>> body = new ErrorMessage<>(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(),
-					null);
+			GeneralResponse<List<PrimerPilar>> body = new GeneralResponse<>(Mensaje.CODE_INTERNAL_SERVER,
+					e.getMessage(), null, null);
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-
-
-		
-		// servicio que trae el listado de fines de semana por zona pais
-		@RequestMapping(value = "/getAllZonaPais", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllZonaPais(@RequestParam Long idZona) {
-			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorZonaPais(idZona);
-			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares por zona en el pais", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
-		
-		// servicio que trae el listado de fines de semana por zona
-		@RequestMapping(value = "/getAllZonaLatam", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAllZonaLatam(@RequestParam Long idZona) {
-			List<PrimerPilar> listado = pilarDTO.obtenerPilarPorZonaLatam(idZona);
-			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares por zona en latam", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 
 	// servicio para crear un fin de semana
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

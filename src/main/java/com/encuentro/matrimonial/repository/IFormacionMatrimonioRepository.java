@@ -19,7 +19,7 @@ public interface IFormacionMatrimonioRepository extends CrudRepository<Formacion
 	@Query(value = "SELECT f FROM FormacionMatrimonio f WHERE f.ciudad.id = :idCiudad")
 	List<FormacionMatrimonio> obtenerFormacionPorCiudad(Long idCiudad);
 
-	@Query(value = "SELECT f FROM FormacionMatrimonio f WHERE f.ciudad.zona.id = :idZona")
-	List<FormacionMatrimonio> obtenerPilarPorZona(Long idZona);
+	//@Query(value = "SELECT f FROM FormacionMatrimonio f WHERE f.ciudad.zona.id = :idZona")
+	//List<FormacionMatrimonio> obtenerPilarPorZona(Long idZona);
 
 }

@@ -37,13 +37,13 @@ public class SegundoPilarController {
 
 	@Autowired
 	private ISegundoPilarService pilarService;
-	
+
 	@Autowired
 	ISegundoPilarRepository pilarDTO;
-	
+
 	@Autowired
 	private IUserService userService;
-	
+
 	// servicio que trae un matrimonio servidor del fds
 	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<?> get(@RequestParam Long id) {
@@ -72,7 +72,7 @@ public class SegundoPilarController {
 
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoPilar = pilarDTO.obtenerPilarPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {
 						listadoPilar = pilarService.getAll();
@@ -96,17 +96,20 @@ public class SegundoPilarController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-		
-		// servicio que trae el listado matrimonios servidores del fds por zona
-		@RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<ErrorMessage<List<SegundoPilar>>> getAllZona(@RequestParam Long idZona) {
-			List<SegundoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
-			ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(1, "No se ha encontrado información", null)
-					: new ErrorMessage<>(0, "Lista de pilares por zona", listado);
-			return new ResponseEntity<>(error, HttpStatus.OK);
-		}
 
+	// servicio que trae el listado matrimonios servidores del fds por zona
+	/*
+	 * @RequestMapping(value = "/getAllZona", method = RequestMethod.GET, headers =
+	 * "Accept=application/json")
+	 * public ResponseEntity<ErrorMessage<List<SegundoPilar>>>
+	 * getAllZona(@RequestParam Long idZona) {
+	 * List<SegundoPilar> listado = pilarDTO.obtenerPilarPorZona(idZona);
+	 * ErrorMessage<List<SegundoPilar>> error = listado.isEmpty()
+	 * ? new ErrorMessage<>(1, "No se ha encontrado información", null)
+	 * : new ErrorMessage<>(0, "Lista de pilares por zona", listado);
+	 * return new ResponseEntity<>(error, HttpStatus.OK);
+	 * }
+	 */
 
 	// servicio para crear un matrimonio servidor para el fds
 	@RequestMapping(value = "/create", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -19,7 +19,7 @@ public interface ISegundoPilarRepository extends CrudRepository<SegundoPilar, Lo
 	@Query(value = "SELECT s FROM segundo_pilar s WHERE s.ciudad.id = :idCiudad")
 	List<SegundoPilar> obtenerPilarPorCiudad(Long idCiudad);
 
-	@Query(value = "SELECT s FROM segundo_pilar s WHERE s.ciudad.zona.id = :idZona")
-	List<SegundoPilar> obtenerPilarPorZona(Long idZona);
+	//@Query(value = "SELECT s FROM segundo_pilar s WHERE s.ciudad.zona.id = :idZona")
+	//List<SegundoPilar> obtenerPilarPorZona(Long idZona);
 
 }

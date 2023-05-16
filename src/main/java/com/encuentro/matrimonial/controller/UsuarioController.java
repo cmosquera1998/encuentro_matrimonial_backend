@@ -43,30 +43,29 @@ public class UsuarioController {
 
 	@Autowired
 	private IUserService userService;
-	
+
 	@Autowired
 	private IUserRepository userDao;
-	
+
 	ObjectMapper mapper = new ObjectMapper();
-	
+
 	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	// servicio que trae un usuario 
-		@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
-		public ResponseEntity<?> get(@RequestParam Long id) {
-			log.debug("Id a consultar:-" + id);
-			try {
-				Usuario user = userService.findBy(id);
-				ErrorMessage<?> error = user == null ? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-						: new ErrorMessage<>(Mensaje.CODE_OK, "Usuario", user);
-				return ResponseEntity.ok().body(error);
-			} catch (Exception e) {
-				log.error("Error:-" + e.getMessage());
-				ErrorMessage2 body = new ErrorMessage2(Mensaje.CODE_INTERNAL_SERVER, e.getMessage());
-				return ResponseEntity.internalServerError().body(body);
-			}
+	// servicio que trae un usuario
+	@RequestMapping(value = "/get", method = RequestMethod.GET, headers = "Accept=application/json")
+	public ResponseEntity<?> get(@RequestParam Long id) {
+		log.debug("Id a consultar:-" + id);
+		try {
+			Usuario user = userService.findBy(id);
+			ErrorMessage<?> error = user == null ? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
+					: new ErrorMessage<>(Mensaje.CODE_OK, "Usuario", user);
+			return ResponseEntity.ok().body(error);
+		} catch (Exception e) {
+			log.error("Error:-" + e.getMessage());
+			ErrorMessage2 body = new ErrorMessage2(Mensaje.CODE_INTERNAL_SERVER, e.getMessage());
+			return ResponseEntity.internalServerError().body(body);
 		}
-	
+	}
 
 	// servicio que trae el listado de usuarios
 	@RequestMapping(value = "/getUsuarios", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -79,7 +78,7 @@ public class UsuarioController {
 				List<Usuario> listadoUser = new ArrayList<Usuario>();
 				if (!roles.isEmpty()) {
 					Role primerRol = roles.get(0);
-					if (primerRol.getName().equals("ROLE_ADMIN")) {
+					if (primerRol.getName().equals("ROLE_NACIONAL")) {
 						listadoUser = userDao.obtenerUsuariosPorPais(usuario.getCiudad().getPais().getId());
 					} else if (primerRol.getName().equals("ROLE_LATAM")) {
 						listadoUser = userService.getUsuarios();
@@ -107,21 +106,21 @@ public class UsuarioController {
 	public ResponseEntity<ErrorMessage2> createUser(@Valid @RequestBody Usuario user) throws JsonProcessingException {
 		String request = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
 		log.info("Request createUsuario {}", request);
-	    Usuario user1 = userService.findByUser(user.getUsername());
-	    Usuario user2 = userService.findByDocumento(user.getDocument());
-	    if (user1 != null || user2 != null) {
-	        return ResponseEntity.ok(new ErrorMessage2(1, "El usuario ya se encuentra registrado"));
-	    }
-	    user.setState(true);
-	    user.setPassword(passwordEncoder.encode(user.getPassword()));
-	    user.setCreationDate(new Date());
-	    try {
-	        userService.createUsuario(user);
-	        return ResponseEntity.ok(new ErrorMessage2(0, "Usuario creado con éxito!"));
-	    } catch (DataAccessException e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(new ErrorMessage2(3, "Ocurrió un error al crear el usuario"));
-	    }
+		Usuario user1 = userService.findByUser(user.getUsername());
+		Usuario user2 = userService.findByDocumento(user.getDocument());
+		if (user1 != null || user2 != null) {
+			return ResponseEntity.ok(new ErrorMessage2(1, "El usuario ya se encuentra registrado"));
+		}
+		user.setState(true);
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setCreationDate(new Date());
+		try {
+			userService.createUsuario(user);
+			return ResponseEntity.ok(new ErrorMessage2(0, "Usuario creado con éxito!"));
+		} catch (DataAccessException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new ErrorMessage2(3, "Ocurrió un error al crear el usuario"));
+		}
 	}
 
 	// servicio para actualizar un usuario
@@ -130,9 +129,9 @@ public class UsuarioController {
 		Optional<Usuario> us = userService.findByIdUsuario(user.getId());
 		if (!us.isPresent()) {
 			return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
-		}		
+		}
 		if (!us.get().getPassword().equals(user.getPassword())) {
-		    user.setPassword(passwordEncoder.encode(user.getPassword()));
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
 		}
 		userService.updateUsuario(user);
 		return new ResponseEntity(new ErrorMessage2(0, "Usuario actualizado con exito!"), HttpStatus.OK);
@@ -152,18 +151,17 @@ public class UsuarioController {
 		userService.updateUsuario(us);
 		return new ResponseEntity(new ErrorMessage2(0, "Usuario desactivado con exito!"), HttpStatus.OK);
 	}
-	
-	// servicio para eliminar un usuario
-		@RequestMapping(value = "/deleteUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
-		public ResponseEntity<?> deleteUsuario(@RequestParam Long id) {
-			Usuario us = userService.findBy(id);
-			System.out.println(us);
-			if (us == null) {
-				return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
-			}
-			userService.deleteUsuario(id);
-			return new ResponseEntity(new ErrorMessage2(0, "Usuario eliminado con exito!"), HttpStatus.OK);
-		}
 
+	// servicio para eliminar un usuario
+	@RequestMapping(value = "/deleteUsuario", method = RequestMethod.POST, headers = "Accept=application/json")
+	public ResponseEntity<?> deleteUsuario(@RequestParam Long id) {
+		Usuario us = userService.findBy(id);
+		System.out.println(us);
+		if (us == null) {
+			return new ResponseEntity(new ErrorMessage2(1, "No sea encontrado el usuario"), HttpStatus.OK);
+		}
+		userService.deleteUsuario(id);
+		return new ResponseEntity(new ErrorMessage2(0, "Usuario eliminado con exito!"), HttpStatus.OK);
+	}
 
 }

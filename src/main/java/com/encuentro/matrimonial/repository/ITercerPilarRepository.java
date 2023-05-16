@@ -19,7 +19,7 @@ public interface ITercerPilarRepository extends CrudRepository<TercerPilar, Long
 	@Query(value = "SELECT t FROM tercer_pilar t WHERE t.ciudad.id = :idCiudad")
 	List<TercerPilar> obtenerPilarPorCiudad(Long idCiudad);
 	
-	@Query(value = "SELECT t FROM tercer_pilar t WHERE t.ciudad.zona.id = :idZona")
-	List<TercerPilar> obtenerPilarPorZona(Long idZona);
+	//@Query(value = "SELECT t FROM tercer_pilar t WHERE t.ciudad.zona.id = :idZona")
+	//List<TercerPilar> obtenerPilarPorZona(Long idZona);
 
 }
