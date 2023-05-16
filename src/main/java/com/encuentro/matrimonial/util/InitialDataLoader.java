@@ -62,15 +62,13 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		List<Privilege> diosesanoPrivileges = Arrays.asList(readPrivilege, writePrivilege);
 
 	
-		createRoleIfNotFound(1L,"ROLE_ADMIN", adminPrivileges);
-		createRoleIfNotFound(2L,"ROLE_USUARIO", Arrays.asList(readPrivilege));
-		createRoleIfNotFound(3L,"ROLE_DIOSESANO", diosesanoPrivileges);
-		createRoleIfNotFound(4L,"ROLE_REGIONAL", Arrays.asList(writePrivilege));
-		createRoleIfNotFound(5L,"ROLE_ZONAL", Arrays.asList(readPrivilege));
-		createRoleIfNotFound(6L,"ROLE_LATAM", adminPrivileges);
+		createRoleIfNotFound(1L,"ROLE_NACIONAL", adminPrivileges);
+		createRoleIfNotFound(2L,"ROLE_DIOSESANO", diosesanoPrivileges);
+		createRoleIfNotFound(3L,"ROLE_REGIONAL", Arrays.asList(writePrivilege));
+		createRoleIfNotFound(4L,"ROLE_ZONAL", Arrays.asList(readPrivilege));
+		createRoleIfNotFound(5L,"ROLE_LATAM", adminPrivileges);
 
-		Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-		Role usuarioRole = roleRepository.findByName("ROLE_USUARIO");
+		Role nacionalRole = roleRepository.findByName("ROLE_NACIONAL");
 		Role diosesanoRole = roleRepository.findByName("ROLE_DIOSESANO");
 		Role regionalRole = roleRepository.findByName("ROLE_REGIONAL");
 		Role zonalRole = roleRepository.findByName("ROLE_ZONAL");
@@ -133,8 +131,8 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 
 		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
 		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadBogota);
-	   createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadMedellin);
-		createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadLima);
+	    //createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadMedellin);
+		//createPrimerPilarIfNotFound(0L, new Date(), 10, 10, 10, 10, 10, ciudadLima);
 		
 		
 		if (userRepository.findByUser("Cmosquera") == null) {
@@ -152,8 +150,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			user.setState(true);
 			
 			ArrayList<Role> roles = new ArrayList<Role>();
-			roles.add(adminRole);
-			roles.add(usuarioRole);
+			roles.add(nacionalRole);
 			roles.add(diosesanoRole);
 			roles.add(regionalRole);
 			roles.add(zonalRole);

@@ -67,16 +67,7 @@ public class UsuarioController {
 			}
 		}
 	
-	// servicio que trae el listado de usuarios
-	/*@RequestMapping(value = "/getUsuarios", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<Usuario>>> getUser() {
-		List<Usuario> listado = userService.getUsuarios();
-		ErrorMessage<List<Usuario>> error = listado.isEmpty()
-				? new ErrorMessage<>(1, "No se ha encontrado información", null)
-				: new ErrorMessage<>(0, "Lista de Usuarios", listado);
-		return new ResponseEntity<>(error, HttpStatus.OK);
-	}*/
-	
+
 	// servicio que trae el listado de usuarios
 	@RequestMapping(value = "/getUsuarios", method = RequestMethod.GET, headers = "Accept=application/json")
 	public ResponseEntity<ErrorMessage<List<Usuario>>> getUser(@RequestParam Long id) {

@@ -59,22 +59,6 @@ public class PrimerPilarController {
 			return ResponseEntity.internalServerError().body(body);
 		}
 	}
-
-	// servicio que trae el listado de fines de semana
-	/*@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")
-	public ResponseEntity<ErrorMessage<List<PrimerPilar>>> getAll() {
-		try {
-			List<PrimerPilar> listado = pilarService.getAll();
-			ErrorMessage<List<PrimerPilar>> error = listado.isEmpty()
-					? new ErrorMessage<>(Mensaje.CODE_NOT_FOUND, Mensaje.NOT_FOUND, null)
-					: new ErrorMessage<>(Mensaje.CODE_OK, "Lista de pilares ", listado);
-			return ResponseEntity.ok().body(error);
-		} catch (Exception e) {
-			log.error("Error:-" + e.getMessage());
-			ErrorMessage body = new ErrorMessage(Mensaje.CODE_INTERNAL_SERVER, e.getMessage(), null);
-			return ResponseEntity.internalServerError().body(body);
-		}
-	}*/
 	
 	//servicio que trae el listado de fines de semana dependiendo el rol puede trar por la ciudad  , todos en general  o por pais 	
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET, headers = "Accept=application/json")

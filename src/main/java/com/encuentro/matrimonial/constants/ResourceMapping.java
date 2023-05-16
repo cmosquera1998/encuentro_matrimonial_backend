@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 public class ResourceMapping {
 
 	public static final String LOGIN = "/login";
+	public static final String ROL = "/rol";
+	public static final String REGION = "/region";
 	public static final String USER = "/user";
 	public static final String PRIMER_PILAR = "/pilar/primerPilar";
 	public static final String SEGUNDO_PILAR = "/pilar/segundoPilar";
